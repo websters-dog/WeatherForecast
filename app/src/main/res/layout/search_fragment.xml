@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
@@ -26,13 +26,15 @@
                     android:gravity="center_vertical|right"
                     android:layout_weight="1"/>
             <EditText
-                    android:id="@+id/edit_latitude"
+                    android:id="@+id/e_latitude"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:textSize="@dimen/text_size"
                     android:inputType="number"
-                    android:ems="10"
+                    android:digits="123456789."
                     android:layout_weight="1"
-                    android:gravity="center_vertical|left"/>
+                    android:gravity="bottom|left"
+                    />
         </TableRow>
 
         <TableRow
@@ -46,26 +48,24 @@
                     android:gravity="center_vertical|right"
                     android:layout_weight="1"/>
             <EditText
-                    android:id="@+id/edit_longitude"
+                    android:id="@+id/e_longitude"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:textSize="@dimen/text_size"
                     android:inputType="number"
-                    android:ems="10"
+                    android:digits="1234567890."
                     android:layout_weight="1"
-                    android:gravity="center_vertical|left"/>
+                    android:gravity="bottom|left"/>
         </TableRow>
         <TableRow
-                android:gravity="center"
-                >
+                android:gravity="center">
 
             <Button
+                    android:id="@+id/b_search"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
                     android:text="@string/search"
-                    android:id="@+id/button"
-                    android:gravity="center"
-                    android:onClick=""
-                    />
+                    android:gravity="center"/>
         </TableRow>
     </TableLayout>
 </RelativeLayout>
