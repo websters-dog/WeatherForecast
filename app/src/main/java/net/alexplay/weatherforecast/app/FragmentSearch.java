@@ -89,13 +89,14 @@ public class FragmentSearch extends Fragment {
                 (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LONGITUDE)
                 );
         Log.d("WEATHER_", city.toString());
+        DatabaseWorker.get().saveCity(city);
 
         ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
         JSONArray jsonForecastArray = jsonForecastMain.getJSONArray(Forecast.JsonEntry.OBJECTS_ARRAY);
         JSONObject jsonForecast;
         for(int i = 0; i < jsonForecastArray.length(); i++){
             jsonForecast = jsonForecastArray.getJSONObject(i);
-            forecasts.add(new Forecast(
+            Forecast forecast = new Forecast(
                     city,
                     jsonForecast.getLong(Forecast.JsonEntry.TIME),
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MIN),
@@ -106,8 +107,17 @@ public class FragmentSearch extends Fragment {
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_WIND).getDouble(Forecast.JsonEntry.WIND_ANGLE),
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_CLOUDS).getDouble(Forecast.JsonEntry.CLOUDS),
                     jsonForecast.getJSONArray(Forecast.JsonEntry.OBJECTS_WEATHER_ARRAY).getJSONObject(0).getString(Forecast.JsonEntry.ICON_CODE)
-                    ));
-            Log.d("WEATHER_", forecasts.get(forecasts.size() - 1).toString());
+            );
+            forecasts.add(forecast);
+            Log.d("WEATHER_", forecast.toString());
+            DatabaseWorker.get().saveForecast(forecast);
+        }
+
+
+        ArrayList<Forecast> loadActualForecasts = DatabaseWorker.get().loadActualForecasts(city.id);
+        Log.d("WEATHER_", System.currentTimeMillis() + " LOADED: " + loadActualForecasts.size());
+        for(Forecast forecast : loadActualForecasts){
+            Log.d("WEATHER_", "LOADED:" + forecast.toString());
         }
 
 

@@ -17,6 +17,8 @@ public class MainActivity extends ActionBarActivity {
                     .add(R.id.container, new FragmentSearch())
                     .commit();
         }
+
+        DatabaseWorker.get().setContext(this);
     }
 
 
