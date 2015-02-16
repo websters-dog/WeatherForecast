@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 
 public class DatabaseWorker {
+
 	
 	private static DatabaseWorker databaseWorker = new DatabaseWorker();
 
@@ -137,12 +138,7 @@ public class DatabaseWorker {
     public void saveForecast(Forecast forecast){
         database.beginTransaction();
         try {
-            Cursor c = database.rawQuery("SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY + " , " + Forecast.FeedEntry.COLUMN_TIME + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
-                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
-                    + " FROM " + Forecast.FeedEntry.TABLE + " WHERE "
+            Cursor c = database.rawQuery("SELECT " + "*" + " FROM " + Forecast.FeedEntry.TABLE + " WHERE "
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";", null);
 
@@ -158,6 +154,7 @@ public class DatabaseWorker {
                 values.put(Forecast.FeedEntry.COLUMN_WIND_ANGLE, forecast.windAngle);
                 values.put(Forecast.FeedEntry.COLUMN_CLOUDS, forecast.cloudsPercent);
                 values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
+                values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
                 database.insert(Forecast.FeedEntry.TABLE, null, values);
             } else {
                 database.rawQuery("UPDATE " + Forecast.FeedEntry.TABLE + " SET "
@@ -168,7 +165,8 @@ public class DatabaseWorker {
                         + Forecast.FeedEntry.COLUMN_WIND_SPEED + " = " + forecast.windSpeed + " , "
                         + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " = " + forecast.windAngle + " , "
                         + Forecast.FeedEntry.COLUMN_CLOUDS + " = " + forecast.cloudsPercent + " , "
-                        + Forecast.FeedEntry.COLUMN_ICON_CODE + " = \"" + forecast.iconCode + "\""
+                        + Forecast.FeedEntry.COLUMN_ICON_CODE + " = \"" + forecast.iconCode + "\", "
+                        + Forecast.FeedEntry.COLUMN_LOAD_TIME + " = " + System.currentTimeMillis() + ""
                         + " WHERE "
                         + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
                         + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";", null);
@@ -196,6 +194,8 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " > " + System.currentTimeMillis()
+                    + " AND "
+                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
                     + ";"
                     , null);
             database.setTransactionSuccessful();
@@ -238,6 +238,8 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
+                    + " AND "
+                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
                     + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
                     + ";";
             c = database.rawQuery(sql, null);
@@ -279,6 +281,8 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " = " + time
+                    + " AND "
+                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
                     + ";";
             c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();

@@ -65,13 +65,22 @@ public class FragmentSearch extends Fragment {
                     return;
                 }
 
-                (new AsyncTask<Float, Void, String>() {
+                (new AsyncTask<Float, Void, ForecastCity>() {
 
                     @Override
-                    protected String doInBackground(Float... params) {
+                    protected ForecastCity doInBackground(Float... params) {
                         try {
                             String result = new String(HttpLoader.load(String.format(REQUEST_URL, params[0], params[1])));
-                            return result;
+                            if(result.length() > 0){
+                                ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
+                                if (forecasts != null && forecasts.size() > 0) {
+                                    int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
+                                    for(int i = 0; i < count; i++){
+                                        DatabaseWorker.get().saveForecast(forecasts.get(i));
+                                    }
+                                    return forecasts.get(0).city;
+                                }
+                            }
                         } catch (final IOException e) {
                             e.printStackTrace();
                             getActivity().runOnUiThread(new Runnable() {
@@ -80,33 +89,19 @@ public class FragmentSearch extends Fragment {
                                     Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                                 }
                             });
-                            return "";
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                         }
+                        return null;
                     }
 
                     @Override
-                    protected void onPostExecute(String result) {
+                    protected void onPostExecute(ForecastCity result) {
                         super.onPostExecute(result);
-                        if(result.length() > 0){
-                            ForecastCity city = null;
-                            try {
-                                ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
-                                if (forecasts != null && forecasts.size() > 0) {
-
-                                    city = forecasts.get(0).city;
-
-                                    int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
-                                    for(int i = 0; i < count; i++){
-                                        DatabaseWorker.get().saveForecast(forecasts.get(i));
-                                    }
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                            screenController.showDateScreen(city);
+                        if (result != null) {
+                            screenController.showDateScreen(result);
                         }
-
                     }
                 }).execute(latitude, longitude);
             }

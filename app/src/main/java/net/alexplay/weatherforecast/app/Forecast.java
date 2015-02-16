@@ -2,6 +2,8 @@ package net.alexplay.weatherforecast.app;
 
 public class Forecast {
 
+    public static final long ACTUAL_TIME = 1000 * 60 * 10;
+
     public ForecastCity city;
 
     public long time;
@@ -53,6 +55,7 @@ public class Forecast {
         public static final String COLUMN_WIND_ANGLE = "WIND_ANGLE";
         public static final String COLUMN_CLOUDS = "CLOUDS";
         public static final String COLUMN_ICON_CODE = "ICON_CODE";
+        public static final String COLUMN_LOAD_TIME = "LOAD_TIME";
 
     }
 

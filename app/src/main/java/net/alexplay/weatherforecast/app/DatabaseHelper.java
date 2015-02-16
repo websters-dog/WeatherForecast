@@ -35,6 +35,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			+ Forecast.FeedEntry.COLUMN_WIND_SPEED + TYPE_REAL + COMMA_SEP
 			+ Forecast.FeedEntry.COLUMN_WIND_ANGLE + TYPE_REAL + COMMA_SEP
 			+ Forecast.FeedEntry.COLUMN_ICON_CODE + TYPE_TEXT + COMMA_SEP
+			+ Forecast.FeedEntry.COLUMN_LOAD_TIME + TYPE_INTEGER + COMMA_SEP
             + KEY + " (" + Forecast.FeedEntry.COLUMN_TIME + COMMA_SEP + Forecast.FeedEntry.COLUMN_CITY + ") "
 			+ ");";
 	

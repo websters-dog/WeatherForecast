@@ -123,6 +123,8 @@ public class FragmentForecasts extends Fragment {
             TextView textView = (TextView) convertView.findViewById(R.id.t_forecast);
             Long forecastClock = (Long) getItem(position);
             textView.setText(String.format(DATE_FORMAT_LIST.format(new Date(forecastClock)) + "\n ---"));
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.i_forecast);
+            imageView.setImageDrawable(null);
             forecastLoader.loadForecast(convertView, city, forecastClock);
             return convertView;
         }
