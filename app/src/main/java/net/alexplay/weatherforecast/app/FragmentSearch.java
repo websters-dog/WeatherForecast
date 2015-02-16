@@ -3,16 +3,13 @@ package net.alexplay.weatherforecast.app;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,8 +64,7 @@ public class FragmentSearch extends Fragment {
                     @Override
                     protected String doInBackground(Float... params) {
                         try {
-                            String result = StringLoader.load(String.format(REQUEST_URL,
-                                    params[0], params[1]));
+                            String result = new String(HttpLoader.load(String.format(REQUEST_URL, params[0], params[1])));
                             return result;
                         } catch (final IOException e) {
                             e.printStackTrace();
@@ -88,7 +84,16 @@ public class FragmentSearch extends Fragment {
                         if(result.length() > 0){
                             ForecastCity city = null;
                             try {
-                                city = processForecast(result);
+                                ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
+                                if (forecasts != null && forecasts.size() > 0) {
+
+                                    city = forecasts.get(0).city;
+
+                                    int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
+                                    for(int i = 0; i < count; i++){
+                                        DatabaseWorker.get().saveForecast(forecasts.get(i));
+                                    }
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -107,51 +112,5 @@ public class FragmentSearch extends Fragment {
     public void setScreenController(ScreenController screenController) {
         this.screenController = screenController;
     }
-
-    public ForecastCity processForecast(String jsonString) throws JSONException {
-        JSONObject jsonForecastMain = new JSONObject(jsonString);
-        JSONObject jsonCity = jsonForecastMain.getJSONObject(ForecastCity.JsonEntry.OBJECT);
-
-        ForecastCity city = new ForecastCity(
-                jsonCity.getLong(ForecastCity.JsonEntry.ID),
-                jsonCity.getString(ForecastCity.JsonEntry.NAME),
-                (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LATITUDE),
-                (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LONGITUDE)
-                );
-        Log.d("WEATHER_", city.toString());
-        DatabaseWorker.get().saveCity(city);
-
-        ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        JSONArray jsonForecastArray = jsonForecastMain.getJSONArray(Forecast.JsonEntry.OBJECTS_ARRAY);
-        int count = PRELOAD_COUNT > jsonForecastArray.length() ? jsonForecastArray.length() : PRELOAD_COUNT;
-        for(int i = 0; i < count; i++){
-            JSONObject jsonForecast = jsonForecastArray.getJSONObject(i);
-            Forecast forecast = new Forecast(
-                    city,
-                    jsonForecast.getLong(Forecast.JsonEntry.TIME) * 1000,
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MIN),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MAX),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.PRESSURE),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.HUMIDITY),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_WIND).getDouble(Forecast.JsonEntry.WIND_SPEED),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_WIND).getDouble(Forecast.JsonEntry.WIND_ANGLE),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_CLOUDS).getDouble(Forecast.JsonEntry.CLOUDS),
-                    jsonForecast.getJSONArray(Forecast.JsonEntry.OBJECTS_WEATHER_ARRAY).getJSONObject(0).getString(Forecast.JsonEntry.ICON_CODE)
-            );
-            forecasts.add(forecast);
-            Log.d("WEATHER_", forecast.toString());
-            DatabaseWorker.get().saveForecast(forecast);
-        }
-
-        ArrayList<Forecast> loadActualForecasts = DatabaseWorker.get().loadForecasts(city.id);
-        Log.d("WEATHER_", System.currentTimeMillis() + " LOADED: " + loadActualForecasts.size());
-        for(Forecast forecast : loadActualForecasts){
-            Log.d("WEATHER_", "LOADED:" + forecast.toString());
-        }
-
-        return city;
-
-    }
-
 
 }

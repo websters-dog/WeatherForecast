@@ -5,12 +5,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +16,8 @@ class ForecastLoader<T> extends HandlerThread {
 
     private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric";
     private static final int MESSAGE_LOAD = 1;
+
+
 
     private Handler responseHandler;
     private Handler loadHandler;
@@ -62,8 +61,8 @@ class ForecastLoader<T> extends HandlerThread {
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
             try {
-                String result = StringLoader.load(String.format(REQUEST_URL, city.latitude, city.longitude));
-                for (Forecast tmpForecast : processForecastString(result)){
+                String result = new String(HttpLoader.load(String.format(REQUEST_URL, city.latitude, city.longitude)));
+                for (Forecast tmpForecast : HttpLoader.processForecastString(result)){
                     if(tmpForecast.time == forecastClock){
                         tmpResultForecast = tmpForecast;
                         break;
@@ -96,41 +95,5 @@ class ForecastLoader<T> extends HandlerThread {
         public void onLoad(T t, Forecast forecast, Drawable forecastImage);
     }
 
-    public ArrayList<Forecast> processForecastString(String jsonString) throws JSONException {
-        JSONObject jsonForecastMain = new JSONObject(jsonString);
-        JSONObject jsonCity = jsonForecastMain.getJSONObject(ForecastCity.JsonEntry.OBJECT);
 
-        ForecastCity city = new ForecastCity(
-                jsonCity.getLong(ForecastCity.JsonEntry.ID),
-                jsonCity.getString(ForecastCity.JsonEntry.NAME),
-                (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LATITUDE),
-                (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LONGITUDE)
-        );
-        Log.d("WEATHER_", city.toString());
-        DatabaseWorker.get().saveCity(city);
-
-        ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        JSONArray jsonForecastArray = jsonForecastMain.getJSONArray(Forecast.JsonEntry.OBJECTS_ARRAY);
-        JSONObject jsonForecast;
-        for(int i = 0; i < jsonForecastArray.length(); i++){
-            jsonForecast = jsonForecastArray.getJSONObject(i);
-            Forecast forecast = new Forecast(
-                    city,
-                    jsonForecast.getLong(Forecast.JsonEntry.TIME) * 1000,
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MIN),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MAX),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.PRESSURE),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.HUMIDITY),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_WIND).getDouble(Forecast.JsonEntry.WIND_SPEED),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_WIND).getDouble(Forecast.JsonEntry.WIND_ANGLE),
-                    (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_CLOUDS).getDouble(Forecast.JsonEntry.CLOUDS),
-                    jsonForecast.getJSONArray(Forecast.JsonEntry.OBJECTS_WEATHER_ARRAY).getJSONObject(0).getString(Forecast.JsonEntry.ICON_CODE)
-            );
-            forecasts.add(forecast);
-            Log.d("WEATHER_", forecast.toString());
-        }
-
-        return forecasts;
-
-    }
 }
