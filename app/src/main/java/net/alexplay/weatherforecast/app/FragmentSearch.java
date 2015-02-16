@@ -17,15 +17,15 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class FragmentSearch extends Fragment {
 
     private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric";
+    private final static int PRELOAD_COUNT = 15;
 
     private EditText editLongitude;
     private EditText editLatitude;
+
+    private ScreenController screenController;
 
     public FragmentSearch() {
     }
@@ -39,21 +39,45 @@ public class FragmentSearch extends Fragment {
         editLongitude= (EditText) rootView.findViewById(R.id.e_longitude);
 
         Button buttonSearch = (Button) rootView.findViewById(R.id.b_search);
+
+
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                (new AsyncTask<Void, Void, String>() {
+                float latitude = 0;
+                float longitude = 0;
+                try {
+                    latitude = Float.parseFloat(editLatitude.getText().toString());
+                    longitude = Float.parseFloat(editLongitude.getText().toString());
+
+                    if (latitude > 90 || latitude < -90
+                            || longitude > 180 || longitude < -180){
+                        throw new NumberFormatException();
+                    }
+
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getActivity(), getResources().getString(R.string.incorrect_search_data), Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                (new AsyncTask<Float, Void, String>() {
 
                     @Override
-                    protected String doInBackground(Void... params) {
+                    protected String doInBackground(Float... params) {
                         try {
                             String result = StringLoader.load(String.format(REQUEST_URL,
-                                    Float.parseFloat(editLatitude.getText().toString()), Float.parseFloat(editLongitude.getText().toString())));
+                                    params[0], params[1]));
                             return result;
-                        } catch (IOException e) {
+                        } catch (final IOException e) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
                             return "";
                         }
                     }
@@ -62,23 +86,29 @@ public class FragmentSearch extends Fragment {
                     protected void onPostExecute(String result) {
                         super.onPostExecute(result);
                         if(result.length() > 0){
+                            ForecastCity city = null;
                             try {
-                                saveForecast(result);
+                                city = processForecast(result);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                             }
+                            screenController.showDateScreen(city);
                         }
 
                     }
-                }).execute();
+                }).execute(latitude, longitude);
             }
         });
 
         return rootView;
     }
 
-    public void saveForecast(String jsonString) throws JSONException {
+    public void setScreenController(ScreenController screenController) {
+        this.screenController = screenController;
+    }
+
+    public ForecastCity processForecast(String jsonString) throws JSONException {
         JSONObject jsonForecastMain = new JSONObject(jsonString);
         JSONObject jsonCity = jsonForecastMain.getJSONObject(ForecastCity.JsonEntry.OBJECT);
 
@@ -93,12 +123,12 @@ public class FragmentSearch extends Fragment {
 
         ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
         JSONArray jsonForecastArray = jsonForecastMain.getJSONArray(Forecast.JsonEntry.OBJECTS_ARRAY);
-        JSONObject jsonForecast;
-        for(int i = 0; i < jsonForecastArray.length(); i++){
-            jsonForecast = jsonForecastArray.getJSONObject(i);
+        int count = PRELOAD_COUNT > jsonForecastArray.length() ? jsonForecastArray.length() : PRELOAD_COUNT;
+        for(int i = 0; i < count; i++){
+            JSONObject jsonForecast = jsonForecastArray.getJSONObject(i);
             Forecast forecast = new Forecast(
                     city,
-                    jsonForecast.getLong(Forecast.JsonEntry.TIME),
+                    jsonForecast.getLong(Forecast.JsonEntry.TIME) * 1000,
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MIN),
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.TEMP_MAX),
                     (float) jsonForecast.getJSONObject(Forecast.JsonEntry.OBJECT_MAIN).getDouble(Forecast.JsonEntry.PRESSURE),
@@ -113,13 +143,13 @@ public class FragmentSearch extends Fragment {
             DatabaseWorker.get().saveForecast(forecast);
         }
 
-
-        ArrayList<Forecast> loadActualForecasts = DatabaseWorker.get().loadActualForecasts(city.id);
+        ArrayList<Forecast> loadActualForecasts = DatabaseWorker.get().loadForecasts(city.id);
         Log.d("WEATHER_", System.currentTimeMillis() + " LOADED: " + loadActualForecasts.size());
         for(Forecast forecast : loadActualForecasts){
             Log.d("WEATHER_", "LOADED:" + forecast.toString());
         }
 
+        return city;
 
     }
 

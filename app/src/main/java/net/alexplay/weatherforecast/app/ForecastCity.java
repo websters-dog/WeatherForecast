@@ -1,6 +1,8 @@
 package net.alexplay.weatherforecast.app;
 
-public class ForecastCity {
+import java.io.Serializable;
+
+public class ForecastCity implements Serializable{
 
     public long id;
     public String name;

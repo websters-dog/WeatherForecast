@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -129,7 +130,7 @@ public class DatabaseWorker {
         }
     }
 
-    public ArrayList<Forecast> loadActualForecasts(long cityId){
+    public ArrayList<Forecast> loadForecasts(long cityId){
         ForecastCity city = loadCity(cityId);
         Cursor c = null;
         database.beginTransaction();
@@ -143,7 +144,7 @@ public class DatabaseWorker {
                     + " WHERE "
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
                     + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " > strftime('%s','now')"
+                    + Forecast.FeedEntry.COLUMN_TIME + " > " + System.currentTimeMillis()
                     + ";"
                     , null);
             database.setTransactionSuccessful();
@@ -162,6 +163,88 @@ public class DatabaseWorker {
             } while (c.moveToNext());
         }
         return forecasts;
+    }
+
+    public ArrayList<Forecast> loadForecasts(long cityId, long timeMin, long timeMax){
+        ForecastCity city = loadCity(cityId);
+        Cursor c = null;
+        database.beginTransaction();
+        try {
+            String sql = "SELECT "
+                    + Forecast.FeedEntry.COLUMN_CITY
+                    + " , " + Forecast.FeedEntry.COLUMN_TIME
+                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
+                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
+                    + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
+                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED
+                    + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE
+                    + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
+                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
+                    + " FROM " + Forecast.FeedEntry.TABLE
+                    + " WHERE "
+                    + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
+                    + " AND "
+                    + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
+                    + " AND "
+                    + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
+                    + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
+                    + ";";
+            Log.d("WEATHER_", sql);
+            c = database.rawQuery(sql, null);
+            database.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+        }
+
+        ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
+        if(c.moveToFirst()){
+            do {
+                Forecast forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
+                        c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
+                forecasts.add(forecast);
+            } while (c.moveToNext());
+        }
+        return forecasts;
+    }
+
+    public Forecast loadForecast(long cityId, long time){
+        ForecastCity city = loadCity(cityId);
+        Cursor c = null;
+        database.beginTransaction();
+        try {
+            String sql = "SELECT "
+                    + Forecast.FeedEntry.COLUMN_CITY
+                    + " , " + Forecast.FeedEntry.COLUMN_TIME
+                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
+                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
+                    + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
+                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED
+                    + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE
+                    + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
+                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
+                    + " FROM " + Forecast.FeedEntry.TABLE
+                    + " WHERE "
+                    + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
+                    + " AND "
+                    + Forecast.FeedEntry.COLUMN_TIME + " = " + time
+                    + ";";
+            Log.d("WEATHER_", sql);
+            c = database.rawQuery(sql, null);
+            database.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+        }
+
+        Forecast forecast = null;
+        if(c.moveToFirst()){
+                forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
+                        c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
+        }
+        return forecast;
     }
 
 }

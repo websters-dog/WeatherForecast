@@ -6,5 +6,17 @@
     <string name="latitude">latitude:</string>
     <string name="longitude">longitude:</string>
     <string name="search">search</string>
+    <string name="city">city:</string>
+    <string name="incorrect_search_data">Please, check input values.</string>
+    <string name="forecast_line" formatted="false">
+        %s\n
+        temperature: %.1f...%.1f °C \n
+        pressure: %.1f hPa \n
+        humidity: %.1f  \n
+        clouds: %.1f  \n
+        wind: %.1f m/s
+    </string>
+
+
 
 </resources>

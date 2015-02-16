@@ -11,7 +11,7 @@ import java.net.URL;
 public class StringLoader {
 
     public static String load(String urlString) throws IOException {
-        Log.d("WEATHER_", urlString);
+        Log.d("WEATHER_load", urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
