@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.util.Log;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -17,19 +16,29 @@ class ForecastLoader<T> extends HandlerThread {
     private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric";
     private static final int MESSAGE_LOAD = 1;
 
+    private static  final String RAIN_URL = "https://ssl.gstatic.com/onebox/weather/256/rain.png";
+    private static  final String SUNNY_URL = "https://ssl.gstatic.com/onebox/weather/256/sunny.png";
+    private static  final String CLOUDY_URL = "https://ssl.gstatic.com/onebox/weather/256/cloudy.png";
 
+    private Drawable rain;
+    private Drawable sunny;
+    private Drawable cloudy;
 
     private Handler responseHandler;
     private Handler loadHandler;
     private LoadListener<T> loadListener;
     private Map<T, ForecastCity> loadRequests = Collections.synchronizedMap(new HashMap<T, ForecastCity>());
     private Map<T, Long> forecastClocks = Collections.synchronizedMap(new HashMap<T, Long>());
+
+    private ImageLoader imageLoader;
+
     private DatabaseWorker databaseWorker;
 
     public ForecastLoader(Handler responseHandler, DatabaseWorker databaseWorker) {
         super("ForecastLoader");
         this.responseHandler = responseHandler;
         this.databaseWorker = databaseWorker;
+        imageLoader = new ImageLoader();
     }
 
     @Override
@@ -53,11 +62,11 @@ class ForecastLoader<T> extends HandlerThread {
     }
 
     private void handleRequest(final T t){
-        final Forecast resultForecast;
         Forecast tmpResultForecast;
         final Long forecastClock = forecastClocks.get(t);
         ForecastCity city = loadRequests.get(t);
-        Log.d("WEATHER_", "db=" + databaseWorker + "; city=" + city + "; clock=" + forecastClock);
+        if(city == null) return;
+
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
             try {
@@ -74,17 +83,48 @@ class ForecastLoader<T> extends HandlerThread {
                 e.printStackTrace();
             }
         }
-        resultForecast = tmpResultForecast;
-        responseHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (forecastClocks.get(t) == forecastClock) {
-                    loadRequests.remove(t);
-                    forecastClocks.remove(t);
-                    loadListener.onLoad(t, resultForecast, null);
-                }
+        final Forecast resultForecast = tmpResultForecast;
+
+        if(resultForecast != null){
+            databaseWorker.saveForecast(resultForecast);
+            String imageUrl;
+            if(resultForecast.iconCode.contains("01") || resultForecast.iconCode.contains("02")){
+                imageUrl = SUNNY_URL;
+            } else if(resultForecast.iconCode.contains("03") || resultForecast.iconCode.contains("04")){
+                imageUrl = CLOUDY_URL;
+            } else {
+                imageUrl = RAIN_URL;
             }
-        });
+            imageLoader.loadImage(imageUrl, new ImageLoader.LoadListener() {
+                @Override
+                public void onLoad(final Drawable drawable) {
+                    responseHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (forecastClocks.get(t) == forecastClock) {
+                                loadRequests.remove(t);
+                                forecastClocks.remove(t);
+                                loadListener.onLoad(t, resultForecast, drawable);
+                            }
+                        }
+                    });
+                }
+            });
+        } else {
+            responseHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (forecastClocks.get(t) == forecastClock) {
+                        loadRequests.remove(t);
+                        forecastClocks.remove(t);
+                        loadListener.onLoad(t, resultForecast, null);
+                    }
+                }
+            });
+        }
+
+
+
     }
 
     public void setLoadListener(LoadListener<T> loadListener) {

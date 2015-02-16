@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -65,13 +66,15 @@ public class FragmentForecasts extends Fragment {
         forecastLoader.start();
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
             @Override
-            public void onLoad(View view, Forecast forecast, Drawable forecastImage) {
+            public void onLoad(View view, Forecast forecast, Drawable forecastDrawable) {
                 if (forecast != null) {
                     TextView textView = (TextView) view.findViewById(R.id.t_forecast);
                     String text = String.format(getResources().getString(R.string.forecast_line),
                             DATE_FORMAT_LIST.format(new Date(forecast.time)),
                             forecast.tempMin, forecast.tempMax, forecast.pressure, forecast.humidity, forecast.cloudsPercent, forecast.windSpeed);
                     textView.setText(text);
+                    ImageView imageView = (ImageView) view.findViewById(R.id.i_forecast);
+                    imageView.setImageDrawable(forecastDrawable);
                 }
             }
         });

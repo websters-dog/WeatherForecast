@@ -12,8 +12,8 @@
         %s\n
         temperature: %.1f...%.1f °C \n
         pressure: %.1f hPa \n
-        humidity: %.1f  \n
-        clouds: %.1f  \n
+        humidity: %.1f %% \n
+        clouds: %.1f %%  \n
         wind: %.1f m/s
     </string>
 

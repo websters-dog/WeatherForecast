@@ -7,16 +7,16 @@
     <ImageView
             android:id="@+id/i_forecast"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:src="#ff0018ff"
+            android:layout_height="96dp"
+            android:layout_weight="3"
+            android:src="#ffffff"
             android:layout_gravity="center_vertical|right"/>
 
     <TextView
             android:id="@+id/t_forecast"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="8"
+            android:layout_height="96dp"
+            android:layout_weight="7"
             android:textSize="@dimen/text_small_size"
             android:gravity="center_vertical|left"
             android:text=""/>

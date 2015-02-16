@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -81,6 +80,58 @@ public class DatabaseWorker {
             city = new ForecastCity(c.getLong(0), c.getString(1), c.getFloat(2), c.getFloat(3));
         }
         return city;
+    }
+
+//    public ForecastCity loadCityClosest(float latitude, float longitude){
+//
+//        Cursor c = null;
+//        database.beginTransaction();
+//        try {
+//            c = database.rawQuery("SELECT "
+//                            + ForecastCity.FeedEntry.COLUMN_ID + " , "
+//                            + ForecastCity.FeedEntry.COLUMN_NAME + " , "
+//                            + ForecastCity.FeedEntry.COLUMN_LATITUDE + " , "
+//                            + ForecastCity.FeedEntry.COLUMN_LONGITUDE
+//                            + " FROM " + ForecastCity.FeedEntry.TABLE
+//                    new String[]{},
+//                    ForecastCity.FeedEntry.COLUMN_ID + " = ?",
+//                    new String[]{"" + id},
+//                    null, null, null);
+//            database.setTransactionSuccessful();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            database.endTransaction();
+//        }
+//        ForecastCity city = null;
+//        if(c != null && c.moveToFirst()){
+//            city = new ForecastCity(c.getLong(0), c.getString(1), c.getFloat(2), c.getFloat(3));
+//        }
+//        return city;
+//    }
+
+    public ArrayList<ForecastCity> loadCities(){
+        Cursor c = null;
+        database.beginTransaction();
+        try {
+            c = database.query(
+                    ForecastCity.FeedEntry.TABLE,
+                    new String[]{ForecastCity.FeedEntry.COLUMN_ID, ForecastCity.FeedEntry.COLUMN_NAME,
+                            ForecastCity.FeedEntry.COLUMN_LATITUDE, ForecastCity.FeedEntry.COLUMN_LONGITUDE},
+                    null, null, null, null, null);
+            database.setTransactionSuccessful();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+        }
+        ArrayList<ForecastCity> cities = new ArrayList<ForecastCity>();
+        if(c != null && c.moveToFirst()){
+            do {
+                cities.add(new ForecastCity(c.getLong(0), c.getString(1), c.getFloat(2), c.getFloat(3)));
+            } while (c.moveToNext());
+        }
+        return cities;
     }
 
     public void saveForecast(Forecast forecast){
@@ -189,7 +240,6 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
                     + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
                     + ";";
-            Log.d("WEATHER_", sql);
             c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();
         } catch (Exception e) {
@@ -230,7 +280,6 @@ public class DatabaseWorker {
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " = " + time
                     + ";";
-            Log.d("WEATHER_", sql);
             c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();
         } catch (Exception e) {

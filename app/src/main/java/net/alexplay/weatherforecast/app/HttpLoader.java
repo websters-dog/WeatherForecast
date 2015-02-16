@@ -46,7 +46,6 @@ public class HttpLoader {
                 (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LATITUDE),
                 (float) jsonCity.getJSONObject(ForecastCity.JsonEntry.OBJECT_CORDS).getDouble(ForecastCity.JsonEntry.LONGITUDE)
         );
-        Log.d("WEATHER_", city.toString());
         DatabaseWorker.get().saveCity(city);
 
         ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
@@ -67,7 +66,6 @@ public class HttpLoader {
                     jsonForecast.getJSONArray(Forecast.JsonEntry.OBJECTS_WEATHER_ARRAY).getJSONObject(0).getString(Forecast.JsonEntry.ICON_CODE)
             );
             forecasts.add(forecast);
-            Log.d("WEATHER_", forecast.toString());
         }
         return forecasts;
     }
