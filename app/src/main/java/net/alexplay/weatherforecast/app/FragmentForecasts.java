@@ -60,11 +60,7 @@ public class FragmentForecasts extends Fragment {
         textHeader = (TextView) rootView.findViewById(R.id.t_forecast_header);
         listDates= (ListView) rootView.findViewById(R.id.l_forecasts);
 
-        startTime = getArguments().getLong(KEY_START_TIME);
-        openTime = System.currentTimeMillis();
-
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
-        forecastLoader.start();
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
             @Override
             public void onLoad(View view, Forecast forecast, Drawable forecastDrawable) {
@@ -80,9 +76,11 @@ public class FragmentForecasts extends Fragment {
             }
         });
 
-        listDates.setAdapter(new DaysAdapter());
-
+        startTime = getArguments().getLong(KEY_START_TIME);
+        openTime = System.currentTimeMillis();
         textHeader.setText(city.name + "\n" + DATE_FORMAT_HEADER.format(new Date(startTime)));
+        forecastLoader.start();
+        listDates.setAdapter(new DaysAdapter());
 
         return rootView;
     }
@@ -90,6 +88,7 @@ public class FragmentForecasts extends Fragment {
     public void setScreenController(ScreenController screenController) {
         this.screenController = screenController;
     }
+
 
     @Override
     public void onDetach() {

@@ -1,5 +1,6 @@
 package net.alexplay.weatherforecast.app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -73,6 +74,7 @@ public class FragmentSearch extends Fragment {
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                     Toast.makeText(getActivity(), getResources().getString(R.string.incorrect_search_data), Toast.LENGTH_LONG).show();
+                    loadingLayout.setVisibility(View.GONE);
                     return;
                 }
 
@@ -120,6 +122,11 @@ public class FragmentSearch extends Fragment {
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
     }
 
     public void setScreenController(ScreenController screenController) {

@@ -35,20 +35,22 @@ public class FragmentDays extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.days_fragment, container, false);
 
-        this.city = (ForecastCity) getArguments().get(KEY_CITY);
-
         textHeader = (TextView) rootView.findViewById(R.id.t_days_header);
         listDates= (ListView) rootView.findViewById(R.id.l_dates);
         listDates.setAdapter(new DaysAdapter());
 
+        this.city = (ForecastCity) getArguments().get(KEY_CITY);
         textHeader.setText(getResources().getString(R.string.city) + " " + city.name);
 
         return rootView;
     }
 
+
     public void setScreenController(ScreenController screenController) {
         this.screenController = screenController;
     }
+
+
 
     private class DaysAdapter extends BaseAdapter{
 

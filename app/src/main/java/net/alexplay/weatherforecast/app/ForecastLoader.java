@@ -66,7 +66,7 @@ class ForecastLoader<T> extends HandlerThread {
 
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
-            Log.d("LOADER", "load online, city=" + city.name);
+            Log.d("LOADER", "load online: city=" + city.id + "; t=" + forecastClock);
             try {
                 String result = new String(HttpLoader.load(String.format(REQUEST_URL, city.latitude, city.longitude)));
                 for (Forecast tmpForecast : HttpLoader.processForecastString(result)){
@@ -76,6 +76,7 @@ class ForecastLoader<T> extends HandlerThread {
                     }
                 }
                 if (tmpResultForecast != null) {
+                    Log.d("LOADER", "save online: city=" + city.id + "; t=" + tmpResultForecast.time);
                     databaseWorker.saveForecast(tmpResultForecast);
                 }
             } catch (IOException e) {

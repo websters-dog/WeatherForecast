@@ -112,41 +112,57 @@ public class DatabaseWorker {
         database.beginTransaction();
 
         try {
-            Cursor c = database.rawQuery("SELECT " + "*" + " FROM " + Forecast.FeedEntry.TABLE + " WHERE "
-                    + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";", null);
+//            Cursor c = database.rawQuery("SELECT " + "*" + " FROM " + Forecast.FeedEntry.TABLE + " WHERE "
+//                    + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
+//                    + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";", null);
+//
+//            if(!c.moveToFirst()){
+//                ContentValues values = new ContentValues();
+//                values.put(Forecast.FeedEntry.COLUMN_CITY, forecast.city.id);
+//                values.put(Forecast.FeedEntry.COLUMN_TIME, forecast.time);
+//                values.put(Forecast.FeedEntry.COLUMN_TEMP_MIN, forecast.tempMin);
+//                values.put(Forecast.FeedEntry.COLUMN_TEMP_MAX, forecast.tempMax);
+//                values.put(Forecast.FeedEntry.COLUMN_PRESSURE, forecast.pressure);
+//                values.put(Forecast.FeedEntry.COLUMN_HUMIDITY, forecast.humidity);
+//                values.put(Forecast.FeedEntry.COLUMN_WIND_SPEED, forecast.windSpeed);
+//                values.put(Forecast.FeedEntry.COLUMN_WIND_ANGLE, forecast.windAngle);
+//                values.put(Forecast.FeedEntry.COLUMN_CLOUDS, forecast.cloudsPercent);
+//                values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
+//                values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
+//                database.insert(Forecast.FeedEntry.TABLE, null, values);
+//                Log.d("DB", "put:" + "\ntime=" + forecast.time + "; city=" + forecast.city.name);
+//            } else {
+//                String sql = "UPDATE " + Forecast.FeedEntry.TABLE + " SET "
+//                        + Forecast.FeedEntry.COLUMN_TEMP_MIN + " = " + forecast.tempMin + " , "
+//                        + Forecast.FeedEntry.COLUMN_TEMP_MAX + " = " + forecast.tempMax + " , "
+//                        + Forecast.FeedEntry.COLUMN_PRESSURE + " = " + forecast.pressure + " , "
+//                        + Forecast.FeedEntry.COLUMN_HUMIDITY + " = " + forecast.humidity + " , "
+//                        + Forecast.FeedEntry.COLUMN_WIND_SPEED + " = " + forecast.windSpeed + " , "
+//                        + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " = " + forecast.windAngle + " , "
+//                        + Forecast.FeedEntry.COLUMN_CLOUDS + " = " + forecast.cloudsPercent + " , "
+//                        + Forecast.FeedEntry.COLUMN_ICON_CODE + " = \"" + forecast.iconCode + "\", "
+//                        + Forecast.FeedEntry.COLUMN_LOAD_TIME + " = " + System.currentTimeMillis() + ""
+//                        + " WHERE "
+//                        + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
+//                        + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";";
+//                database.rawQuery(sql, null);
+//            }
 
-            if(!c.moveToFirst()){
-                ContentValues values = new ContentValues();
-                values.put(Forecast.FeedEntry.COLUMN_CITY, forecast.city.id);
-                values.put(Forecast.FeedEntry.COLUMN_TIME, forecast.time);
-                values.put(Forecast.FeedEntry.COLUMN_TEMP_MIN, forecast.tempMin);
-                values.put(Forecast.FeedEntry.COLUMN_TEMP_MAX, forecast.tempMax);
-                values.put(Forecast.FeedEntry.COLUMN_PRESSURE, forecast.pressure);
-                values.put(Forecast.FeedEntry.COLUMN_HUMIDITY, forecast.humidity);
-                values.put(Forecast.FeedEntry.COLUMN_WIND_SPEED, forecast.windSpeed);
-                values.put(Forecast.FeedEntry.COLUMN_WIND_ANGLE, forecast.windAngle);
-                values.put(Forecast.FeedEntry.COLUMN_CLOUDS, forecast.cloudsPercent);
-                values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
-                values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
-                database.insert(Forecast.FeedEntry.TABLE, null, values);
-                Log.d("DB", "put:" + "\ntime=" + forecast.time + "; city=" + forecast.city.name);
-            } else {
-                String sql = "UPDATE " + Forecast.FeedEntry.TABLE + " SET "
-                        + Forecast.FeedEntry.COLUMN_TEMP_MIN + " = " + forecast.tempMin + " , "
-                        + Forecast.FeedEntry.COLUMN_TEMP_MAX + " = " + forecast.tempMax + " , "
-                        + Forecast.FeedEntry.COLUMN_PRESSURE + " = " + forecast.pressure + " , "
-                        + Forecast.FeedEntry.COLUMN_HUMIDITY + " = " + forecast.humidity + " , "
-                        + Forecast.FeedEntry.COLUMN_WIND_SPEED + " = " + forecast.windSpeed + " , "
-                        + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " = " + forecast.windAngle + " , "
-                        + Forecast.FeedEntry.COLUMN_CLOUDS + " = " + forecast.cloudsPercent + " , "
-                        + Forecast.FeedEntry.COLUMN_ICON_CODE + " = \"" + forecast.iconCode + "\", "
-                        + Forecast.FeedEntry.COLUMN_LOAD_TIME + " = " + System.currentTimeMillis() + ""
-                        + " WHERE "
-                        + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
-                        + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";";
-                database.rawQuery(sql, null);
-            }
+            ContentValues values = new ContentValues();
+            values.put(Forecast.FeedEntry.COLUMN_CITY, forecast.city.id);
+            values.put(Forecast.FeedEntry.COLUMN_TIME, forecast.time);
+            values.put(Forecast.FeedEntry.COLUMN_TEMP_MIN, forecast.tempMin);
+            values.put(Forecast.FeedEntry.COLUMN_TEMP_MAX, forecast.tempMax);
+            values.put(Forecast.FeedEntry.COLUMN_PRESSURE, forecast.pressure);
+            values.put(Forecast.FeedEntry.COLUMN_HUMIDITY, forecast.humidity);
+            values.put(Forecast.FeedEntry.COLUMN_WIND_SPEED, forecast.windSpeed);
+            values.put(Forecast.FeedEntry.COLUMN_WIND_ANGLE, forecast.windAngle);
+            values.put(Forecast.FeedEntry.COLUMN_CLOUDS, forecast.cloudsPercent);
+            values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
+            values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
+            database.insertWithOnConflict(Forecast.FeedEntry.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            Log.d("DB", "put:" + "\ntime=" + forecast.time + "; city=" + forecast.city.name);
+
             database.setTransactionSuccessful();
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,15 +177,18 @@ public class DatabaseWorker {
         database.beginTransaction();
         try {
             c = database.rawQuery("SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY + " , " + Forecast.FeedEntry.COLUMN_TIME + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
-                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
-                    + " FROM " + Forecast.FeedEntry.TABLE
-                    + " WHERE "
-                    + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
-                    + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " > " + System.currentTimeMillis()
+                    + Forecast.FeedEntry.COLUMN_CITY + " , "
+                    + Forecast.FeedEntry.COLUMN_TIME + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MIN + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , "
+                    + Forecast.FeedEntry.COLUMN_PRESSURE + " , "
+                    + Forecast.FeedEntry.COLUMN_HUMIDITY + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , "
+                    + Forecast.FeedEntry.COLUMN_CLOUDS + " , "
+                    + Forecast.FeedEntry.COLUMN_ICON_CODE + " FROM "
+                    + Forecast.FeedEntry.TABLE
+                    + " WHERE " + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
                     + ";"
                     , null);
             database.setTransactionSuccessful();
@@ -196,23 +215,20 @@ public class DatabaseWorker {
         database.beginTransaction();
         try {
             String sql = "SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY
-                    + " , " + Forecast.FeedEntry.COLUMN_TIME
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX
-                    + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
-                    + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE
-                    + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
-                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
+                    + Forecast.FeedEntry.COLUMN_CITY + " , "
+                    + Forecast.FeedEntry.COLUMN_TIME + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MIN + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , "
+                    + Forecast.FeedEntry.COLUMN_PRESSURE + " , "
+                    + Forecast.FeedEntry.COLUMN_HUMIDITY + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , "
+                    + Forecast.FeedEntry.COLUMN_CLOUDS + " , "
+                    + Forecast.FeedEntry.COLUMN_ICON_CODE
                     + " FROM " + Forecast.FeedEntry.TABLE
-                    + " WHERE "
-                    + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
-                    + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
-                    + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
+                    + " WHERE " + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
+                    + " AND " + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
+                    + " AND " + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
                     + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
                     + ";";
             c = database.rawQuery(sql, null);
@@ -240,23 +256,22 @@ public class DatabaseWorker {
         database.beginTransaction();
         try {
             String sql = "SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY
-                    + " , " + Forecast.FeedEntry.COLUMN_TIME
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
-                    + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED
-                    + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE
-                    + " , " + Forecast.FeedEntry.COLUMN_CLOUDS
-                    + " , " + Forecast.FeedEntry.COLUMN_ICON_CODE
+                    + Forecast.FeedEntry.COLUMN_CITY + " , "
+                    + Forecast.FeedEntry.COLUMN_TIME + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MIN + " , "
+                    + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , "
+                    + Forecast.FeedEntry.COLUMN_PRESSURE + " , "
+                    + Forecast.FeedEntry.COLUMN_HUMIDITY + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , "
+                    + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , "
+                    + Forecast.FeedEntry.COLUMN_CLOUDS + " , "
+                    + Forecast.FeedEntry.COLUMN_ICON_CODE
                     + " FROM " + Forecast.FeedEntry.TABLE
-                    + " WHERE "
-                    + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
-                    + " AND "
-                    + Forecast.FeedEntry.COLUMN_TIME + " = " + time
-                    + " AND "
-                    + "" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + " < " + Forecast.ACTUAL_TIME
+                    + " WHERE " + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
+                    + " AND " + Forecast.FeedEntry.COLUMN_TIME + " = " + time
+                    + " AND ((" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME + ")"
                     + ";";
+            Log.d("DB", sql);
             c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();
         } catch (Exception e) {
