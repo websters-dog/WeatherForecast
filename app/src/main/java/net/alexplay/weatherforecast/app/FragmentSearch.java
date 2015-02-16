@@ -18,11 +18,12 @@ import java.util.ArrayList;
 
 public class FragmentSearch extends Fragment {
 
-    private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric";
+    private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&units=metric";
     private final static int PRELOAD_COUNT = 15;
 
     private EditText editLongitude;
     private EditText editLatitude;
+    private View loadingLayout;
 
     private ScreenController screenController;
 
@@ -35,7 +36,15 @@ public class FragmentSearch extends Fragment {
         View rootView = inflater.inflate(R.layout.search_fragment, container, false);
 
         editLatitude = (EditText) rootView.findViewById(R.id.e_latitude);
-        editLongitude= (EditText) rootView.findViewById(R.id.e_longitude);
+        editLongitude = (EditText) rootView.findViewById(R.id.e_longitude);
+        loadingLayout = rootView.findViewById(R.id.l_loading);
+        loadingLayout.setVisibility(View.GONE);
+        loadingLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         Button buttonSearch = (Button) rootView.findViewById(R.id.b_search);
 
@@ -43,6 +52,8 @@ public class FragmentSearch extends Fragment {
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                loadingLayout.setVisibility(View.VISIBLE);
 
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
@@ -102,6 +113,7 @@ public class FragmentSearch extends Fragment {
                         if (result != null) {
                             screenController.showDateScreen(result);
                         }
+                        loadingLayout.setVisibility(View.GONE);
                     }
                 }).execute(latitude, longitude);
             }

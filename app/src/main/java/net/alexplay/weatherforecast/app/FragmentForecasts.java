@@ -29,7 +29,6 @@ public class FragmentForecasts extends Fragment {
     public static final SimpleDateFormat DATE_FORMAT_HEADER = new SimpleDateFormat("dd/MMM/yyyy");
     public static final SimpleDateFormat DATE_FORMAT_LIST = new SimpleDateFormat("HH:mm z");
 
-
     static {
         DATE_FORMAT_HEADER.setTimeZone(new SimpleTimeZone(0, "GMT"));
         DATE_FORMAT_LIST.setTimeZone(new SimpleTimeZone(0, "GMT"));
@@ -44,6 +43,8 @@ public class FragmentForecasts extends Fragment {
     private ScreenController screenController;
 
     private long startTime;
+    private long openTime;
+
 
     public FragmentForecasts() {
     }
@@ -60,7 +61,7 @@ public class FragmentForecasts extends Fragment {
         listDates= (ListView) rootView.findViewById(R.id.l_forecasts);
 
         startTime = getArguments().getLong(KEY_START_TIME);
-
+        openTime = System.currentTimeMillis();
 
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
         forecastLoader.start();
@@ -101,12 +102,20 @@ public class FragmentForecasts extends Fragment {
 
         @Override
         public int getCount() {
-            return (int) (NYCHTHEMERON / TIME_INTERVAL);
+            if(startTime < openTime){
+                return (int) ((NYCHTHEMERON) / TIME_INTERVAL - (openTime % NYCHTHEMERON / TIME_INTERVAL + 1));
+            } else {
+                return (int) ((NYCHTHEMERON - startTime % NYCHTHEMERON) / TIME_INTERVAL);
+            }
         }
 
         @Override
         public Object getItem(int position) {
-            return startTime + TIME_INTERVAL * position;
+            if(startTime < openTime){
+                return startTime + ((NYCHTHEMERON) / TIME_INTERVAL - getCount() + position) * TIME_INTERVAL;
+            } else {
+                return startTime + TIME_INTERVAL * position;
+            }
         }
 
         @Override

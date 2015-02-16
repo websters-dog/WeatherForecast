@@ -3,7 +3,6 @@ package net.alexplay.weatherforecast.app;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -17,15 +16,12 @@ public class ImageLoader {
 
 
     public void loadImage(String url, LoadListener loadListener){
-        Log.d("WEATHER_ImageLoader_", "load:" + url);
         if(drawableMap.containsKey(url)){
-            Log.d("WEATHER_ImageLoader_", "return: " + url);
             loadListener.onLoad(drawableMap.get(url));
         } else {
             if(!waitMap.containsValue(url)){
                 waitMap.put(loadListener, url);
                 Drawable drawable = null;
-                Log.d("WEATHER_ImageLoader_", "loading: " + url);
                 try {
                     byte[] bytes = HttpLoader.load(url);
                     drawable = new BitmapDrawable(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
@@ -36,7 +32,6 @@ public class ImageLoader {
                 for(LoadListener tmpLoadListener : waitMap.keySet()){
                     if(waitMap.get(loadListener).equals(url)){
                         waitMap.remove(tmpLoadListener);
-                        Log.d("WEATHER_ImageLoader_", "return loaded: " + url);
                         loadListener.onLoad(drawable);
                     }
                 }

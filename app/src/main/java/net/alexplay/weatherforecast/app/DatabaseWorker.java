@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -83,34 +84,6 @@ public class DatabaseWorker {
         return city;
     }
 
-//    public ForecastCity loadCityClosest(float latitude, float longitude){
-//
-//        Cursor c = null;
-//        database.beginTransaction();
-//        try {
-//            c = database.rawQuery("SELECT "
-//                            + ForecastCity.FeedEntry.COLUMN_ID + " , "
-//                            + ForecastCity.FeedEntry.COLUMN_NAME + " , "
-//                            + ForecastCity.FeedEntry.COLUMN_LATITUDE + " , "
-//                            + ForecastCity.FeedEntry.COLUMN_LONGITUDE
-//                            + " FROM " + ForecastCity.FeedEntry.TABLE
-//                    new String[]{},
-//                    ForecastCity.FeedEntry.COLUMN_ID + " = ?",
-//                    new String[]{"" + id},
-//                    null, null, null);
-//            database.setTransactionSuccessful();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            database.endTransaction();
-//        }
-//        ForecastCity city = null;
-//        if(c != null && c.moveToFirst()){
-//            city = new ForecastCity(c.getLong(0), c.getString(1), c.getFloat(2), c.getFloat(3));
-//        }
-//        return city;
-//    }
-
     public ArrayList<ForecastCity> loadCities(){
         Cursor c = null;
         database.beginTransaction();
@@ -137,6 +110,7 @@ public class DatabaseWorker {
 
     public void saveForecast(Forecast forecast){
         database.beginTransaction();
+
         try {
             Cursor c = database.rawQuery("SELECT " + "*" + " FROM " + Forecast.FeedEntry.TABLE + " WHERE "
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
@@ -156,8 +130,9 @@ public class DatabaseWorker {
                 values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
                 values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
                 database.insert(Forecast.FeedEntry.TABLE, null, values);
+                Log.d("DB", "put:" + "\ntime=" + forecast.time + "; city=" + forecast.city.name);
             } else {
-                database.rawQuery("UPDATE " + Forecast.FeedEntry.TABLE + " SET "
+                String sql = "UPDATE " + Forecast.FeedEntry.TABLE + " SET "
                         + Forecast.FeedEntry.COLUMN_TEMP_MIN + " = " + forecast.tempMin + " , "
                         + Forecast.FeedEntry.COLUMN_TEMP_MAX + " = " + forecast.tempMax + " , "
                         + Forecast.FeedEntry.COLUMN_PRESSURE + " = " + forecast.pressure + " , "
@@ -169,7 +144,8 @@ public class DatabaseWorker {
                         + Forecast.FeedEntry.COLUMN_LOAD_TIME + " = " + System.currentTimeMillis() + ""
                         + " WHERE "
                         + Forecast.FeedEntry.COLUMN_CITY + " = " + forecast.city.id + " AND "
-                        + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";", null);
+                        + Forecast.FeedEntry.COLUMN_TIME + " = " + forecast.time + ";";
+                database.rawQuery(sql, null);
             }
             database.setTransactionSuccessful();
         } catch (Exception e) {
@@ -194,8 +170,6 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " > " + System.currentTimeMillis()
-                    + " AND "
-                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
                     + ";"
                     , null);
             database.setTransactionSuccessful();
@@ -206,7 +180,7 @@ public class DatabaseWorker {
         }
 
         ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        if(c.moveToFirst()){
+        if(c != null && c.moveToFirst()){
             do {
                 Forecast forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
                         c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
@@ -225,7 +199,8 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_CITY
                     + " , " + Forecast.FeedEntry.COLUMN_TIME
                     + " , " + Forecast.FeedEntry.COLUMN_TEMP_MIN
-                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
+                    + " , " + Forecast.FeedEntry.COLUMN_TEMP_MAX
+                    + " , " + Forecast.FeedEntry.COLUMN_PRESSURE
                     + " , " + Forecast.FeedEntry.COLUMN_HUMIDITY
                     + " , " + Forecast.FeedEntry.COLUMN_WIND_SPEED
                     + " , " + Forecast.FeedEntry.COLUMN_WIND_ANGLE
@@ -238,8 +213,6 @@ public class DatabaseWorker {
                     + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
-                    + " AND "
-                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
                     + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
                     + ";";
             c = database.rawQuery(sql, null);
@@ -251,7 +224,7 @@ public class DatabaseWorker {
         }
 
         ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        if(c.moveToFirst()){
+        if(c != null && c.moveToFirst()){
             do {
                 Forecast forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
                         c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
@@ -282,7 +255,7 @@ public class DatabaseWorker {
                     + " AND "
                     + Forecast.FeedEntry.COLUMN_TIME + " = " + time
                     + " AND "
-                    + "(" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME
+                    + "" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + " < " + Forecast.ACTUAL_TIME
                     + ";";
             c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();
@@ -293,7 +266,7 @@ public class DatabaseWorker {
         }
 
         Forecast forecast = null;
-        if(c.moveToFirst()){
+        if(c != null && c.moveToFirst()){
                 forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
                         c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
         }

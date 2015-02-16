@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class HttpLoader {
 
     public static byte[] load(String urlString) throws IOException {
-        Log.d("WEATHER_load", urlString);
+        Log.d("HTTP_LOADER", "load: " + urlString);
         URL url = new URL(urlString);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {

@@ -2,24 +2,25 @@ package net.alexplay.weatherforecast.app;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import java.util.Stack;
 
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends ActionBarActivity {
 
-    private Stack<Fragment> fragmentStack = new Stack<Fragment>();
-    private Class[] fragmentClasses = new Class[]{
-            FragmentDays.class,
-            FragmentSearch.class
-    };
 
     ScreenController screenController = new ScreenController() {
+
+        private Stack<Fragment> fragmentStack = new Stack<Fragment>();
+
+        private FragmentForecasts fragmentForecasts;
+        private FragmentDays fragmentDays;
+        private FragmentSearch fragmentSearch;
+
         @Override
         public void showSearchScreen() {
             if (fragmentStack.size() > 0) {
@@ -27,13 +28,15 @@ public class MainActivity extends FragmentActivity {
                         .remove(fragmentStack.peek())
                         .commit();
             }
-            FragmentSearch fragment = new FragmentSearch();
+            if (fragmentSearch == null) {
+                fragmentSearch = new FragmentSearch();
+            }
             Bundle bundle = new Bundle();
-            fragment.setArguments(bundle);
-            fragment.setScreenController(this);
-            fragmentStack.add(fragment);
+            fragmentSearch.setArguments(bundle);
+            fragmentSearch.setScreenController(this);
+            fragmentStack.add(fragmentSearch);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragmentSearch)
                     .commit();
         }
 
@@ -45,14 +48,16 @@ public class MainActivity extends FragmentActivity {
                         .commit();
             }
 
-            FragmentDays fragment = new FragmentDays();
+            if (fragmentDays == null) {
+                fragmentDays = new FragmentDays();
+            }
             Bundle bundle = new Bundle();
             bundle.putSerializable(FragmentDays.KEY_CITY, city);
-            fragment.setArguments(bundle);
-            fragment.setScreenController(this);
-            fragmentStack.add(fragment);
+            fragmentDays.setArguments(bundle);
+            fragmentDays.setScreenController(this);
+            fragmentStack.add(fragmentDays);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragmentDays)
                     .commit();
 
         }
@@ -64,15 +69,17 @@ public class MainActivity extends FragmentActivity {
                         .remove(fragmentStack.peek())
                         .commit();
             }
-            FragmentForecasts fragment = new FragmentForecasts();
+            if (fragmentForecasts == null) {
+                fragmentForecasts = new FragmentForecasts();
+            }
             Bundle bundle = new Bundle();
             bundle.putSerializable(FragmentForecasts.KEY_CITY, city);
             bundle.putSerializable(FragmentForecasts.KEY_START_TIME, dayZeroTime);
-            fragment.setScreenController(this);
-            fragment.setArguments(bundle);
-            fragmentStack.add(fragment);
+            fragmentForecasts.setScreenController(this);
+            fragmentForecasts.setArguments(bundle);
+            fragmentStack.add(fragmentForecasts);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragmentForecasts)
                     .commit();
         }
 
@@ -108,14 +115,9 @@ public class MainActivity extends FragmentActivity {
     }
 
     @Override
-    public void openContextMenu(View view) {
-        super.openContextMenu(view);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
