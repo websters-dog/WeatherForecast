@@ -7,7 +7,8 @@
     <string name="longitude">longitude:</string>
     <string name="search">search</string>
     <string name="city">city:</string>
-    <string name="incorrect_search_data">Please, check input values.</string>
+    <string name="incorrect_search_data">Input data incorrect. Please recheck.</string>
+    <string name="search_error">Data loading error. Please check your connection.</string>
     <string name="forecast_line" formatted="false">
         %s\n
         temperature: %.1f...%.1f °C \n

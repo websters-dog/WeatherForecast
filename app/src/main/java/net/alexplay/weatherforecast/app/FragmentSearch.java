@@ -22,11 +22,17 @@ public class FragmentSearch extends Fragment {
     private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&units=metric";
     private final static int PRELOAD_COUNT = 15;
 
+    private final static float LATITUDE_MIN = -90f;
+    private final static float LATITUDE_MAX = 90f;
+    private final static float LONGITUDE_MIN = -180f;
+    private final static float LONGITUDE_MAX = 180f;
+
     private EditText editLongitude;
     private EditText editLatitude;
     private View loadingLayout;
 
     private ScreenController screenController;
+    private AsyncTask<Float, Void, ForecastCity> preloadTask;
 
     public FragmentSearch() {
     }
@@ -48,80 +54,44 @@ public class FragmentSearch extends Fragment {
         });
 
         Button buttonSearch = (Button) rootView.findViewById(R.id.b_search);
-
-
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                loadingLayout.setVisibility(View.VISIBLE);
-
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(editLatitude.getWindowToken(), 0);
-
-                float latitude;
-                float longitude;
-                try {
-                    latitude = Float.parseFloat(editLatitude.getText().toString());
-                    longitude = Float.parseFloat(editLongitude.getText().toString());
-
-                    if (latitude > 90 || latitude < -90
-                            || longitude > 180 || longitude < -180){
-                        throw new NumberFormatException();
-                    }
-
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getActivity(), getResources().getString(R.string.incorrect_search_data), Toast.LENGTH_LONG).show();
-                    loadingLayout.setVisibility(View.GONE);
-                    return;
-                }
-
-                (new AsyncTask<Float, Void, ForecastCity>() {
-
-                    @Override
-                    protected ForecastCity doInBackground(Float... params) {
-                        try {
-                            String result = new String(HttpLoader.load(String.format(REQUEST_URL, params[0], params[1])));
-                            if(result.length() > 0){
-                                ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
-                                if (forecasts != null && forecasts.size() > 0) {
-                                    int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
-                                    for(int i = 0; i < count; i++){
-                                        DatabaseWorker.get().saveForecast(forecasts.get(i));
-                                    }
-                                    return forecasts.get(0).city;
-                                }
-                            }
-                        } catch (final IOException e) {
-                            e.printStackTrace();
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(ForecastCity result) {
-                        super.onPostExecute(result);
-                        if (result != null) {
-                            screenController.showDateScreen(result);
-                        }
-                        loadingLayout.setVisibility(View.GONE);
-                    }
-                }).execute(latitude, longitude);
+                onSearchButtonClick();
             }
+
         });
 
         return rootView;
+    }
+
+    private void onSearchButtonClick(){
+        loadingLayout.setVisibility(View.VISIBLE);
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editLatitude.getWindowToken(), 0);
+
+        try {
+            if(preloadTask != null
+                    && preloadTask.getStatus() == AsyncTask.Status.RUNNING){
+                return;
+            }
+            preloadTask = new PreloadAsynkTask();
+            preloadTask.execute(getFloatFromField(editLatitude, LATITUDE_MIN, LATITUDE_MAX),
+                    getFloatFromField(editLongitude, LONGITUDE_MIN, LONGITUDE_MAX));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), getResources().getString(R.string.incorrect_search_data), Toast.LENGTH_LONG).show();
+            loadingLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private float getFloatFromField(EditText editText, float minValue, float maxValue){
+        float result = Float.parseFloat(editText.getText().toString());
+        if (result > maxValue || result < minValue){
+            throw new NumberFormatException();
+        }
+        return result;
     }
 
     @Override
@@ -129,11 +99,62 @@ public class FragmentSearch extends Fragment {
         super.onAttach(activity);
     }
 
+    @Override
+    public void onDetach() {
+        if(preloadTask != null && preloadTask.getStatus() == AsyncTask.Status.RUNNING){
+            preloadTask.cancel(true);
+        }
+        super.onDetach();
+    }
+
     public void setScreenController(ScreenController screenController) {
         this.screenController = screenController;
     }
 
+    private class PreloadAsynkTask extends AsyncTask<Float, Void, ForecastCity> {
 
+        @Override
+        protected ForecastCity doInBackground(Float... params) {
+            try {
+                String result = new String(HttpLoader.load(String.format(REQUEST_URL, params[0], params[1])));
+                if (result.length() > 0) {
+                    ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
+                    if (forecasts != null && forecasts.size() > 0) {
+                        int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
+                        for (int i = 0; i < count; i++) {
+                            DatabaseWorker.get().saveForecast(forecasts.get(i));
+                        }
+                        return forecasts.get(0).city;
+                    }
+                }
+            } catch (final IOException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            } catch (final JSONException e) {
+                e.printStackTrace();
+                getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+            return null;
+        }
 
-
+        @Override
+        protected void onPostExecute(ForecastCity result) {
+            super.onPostExecute(result);
+            if (result != null) {
+                screenController.showDateScreen(result);
+            } else {
+                Toast.makeText(getActivity(), getResources().getString(R.string.search_error), Toast.LENGTH_LONG).show();
+            }
+            loadingLayout.setVisibility(View.GONE);
+        }
+    }
 }
