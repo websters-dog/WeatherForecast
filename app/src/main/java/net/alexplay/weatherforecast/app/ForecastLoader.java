@@ -104,7 +104,7 @@ class ForecastLoader<T> extends HandlerThread {
                     responseHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (forecastClocks.get(t) == forecastClock) {
+                            if (forecastClocks.get(t).equals(forecastClock)) {
                                 forecastCities.remove(t);
                                 forecastClocks.remove(t);
                                 loadListener.onLoad(t, resultForecast, drawable);
@@ -117,10 +117,10 @@ class ForecastLoader<T> extends HandlerThread {
             responseHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (forecastClocks.get(t) == forecastClock) {
+                    if (forecastClocks.get(t).equals(forecastClock)) {
                         forecastCities.remove(t);
                         forecastClocks.remove(t);
-                        loadListener.onLoad(t, resultForecast, null);
+                        loadListener.onLoad(t, null, null);
                     }
                 }
             });
