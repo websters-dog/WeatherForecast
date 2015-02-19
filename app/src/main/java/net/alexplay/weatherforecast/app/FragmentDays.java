@@ -20,9 +20,6 @@ public class FragmentDays extends Fragment {
     public static long NYCHTHEMERON = 1000 * 60 * 60 * 24;
     public final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MMMM/yyyy");
 
-    private TextView textHeader;
-    private ListView listDates;
-
     private ForecastCity city;
     private ScreenController screenController;
 
@@ -35,8 +32,8 @@ public class FragmentDays extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.days_fragment, container, false);
 
-        textHeader = (TextView) rootView.findViewById(R.id.t_days_header);
-        listDates= (ListView) rootView.findViewById(R.id.l_dates);
+        TextView textHeader = (TextView) rootView.findViewById(R.id.t_days_header);
+        ListView listDates = (ListView) rootView.findViewById(R.id.l_dates);
         listDates.setAdapter(new DaysAdapter());
 
         this.city = (ForecastCity) getArguments().get(KEY_CITY);
@@ -61,8 +58,7 @@ public class FragmentDays extends Fragment {
 
         @Override
         public Object getItem(int position) {
-            Date date = new Date(System.currentTimeMillis() + NYCHTHEMERON * position);
-            return date;
+            return new Date(System.currentTimeMillis() + NYCHTHEMERON * position);
         }
 
         @Override

@@ -56,11 +56,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		
 	}
 
-    public void saveCity(ForecastCity city){
-
-    }
-
-	
-	
-
 }

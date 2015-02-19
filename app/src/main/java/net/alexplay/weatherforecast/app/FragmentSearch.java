@@ -60,8 +60,8 @@ public class FragmentSearch extends Fragment {
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(editLatitude.getWindowToken(), 0);
 
-                float latitude = 0;
-                float longitude = 0;
+                float latitude;
+                float longitude;
                 try {
                     latitude = Float.parseFloat(editLatitude.getText().toString());
                     longitude = Float.parseFloat(editLongitude.getText().toString());

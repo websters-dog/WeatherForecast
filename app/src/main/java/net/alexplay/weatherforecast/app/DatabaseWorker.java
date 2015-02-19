@@ -6,21 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import java.util.ArrayList;
-
 public class DatabaseWorker {
 
 	
 	private static DatabaseWorker databaseWorker = new DatabaseWorker();
 
 	private SQLiteDatabase database;
-	private DatabaseHelper databaseHelper;
 
-	private DatabaseWorker() {
+    private DatabaseWorker() {
 	}
 
     public void setContext(Context context){
-        databaseHelper = new DatabaseHelper(context);
+        DatabaseHelper databaseHelper = new DatabaseHelper(context);
         database = databaseHelper.getWritableDatabase();
     }
 	
@@ -73,32 +70,6 @@ public class DatabaseWorker {
         return null;
     }
 
-    public ArrayList<ForecastCity> loadCities(){
-
-        ArrayList<ForecastCity> cities = new ArrayList<ForecastCity>();
-        database.beginTransaction();
-        try {
-
-            Cursor c = database.query(
-                    ForecastCity.FeedEntry.TABLE,
-                    new String[]{ForecastCity.FeedEntry.COLUMN_ID, ForecastCity.FeedEntry.COLUMN_NAME,
-                            ForecastCity.FeedEntry.COLUMN_LATITUDE, ForecastCity.FeedEntry.COLUMN_LONGITUDE},
-                    null, null, null, null, null);
-            database.setTransactionSuccessful();
-            while (c.moveToNext()){
-                cities.add(new ForecastCity(c.getLong(0), c.getString(1), c.getFloat(2), c.getFloat(3)));
-            }
-            c.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
-
-        return cities;
-    }
-
     public void saveForecast(Forecast forecast){
 
         database.beginTransaction();
@@ -125,84 +96,6 @@ public class DatabaseWorker {
         } finally {
             database.endTransaction();
         }
-    }
-
-    public ArrayList<Forecast> loadForecasts(long cityId){
-        ForecastCity city = loadCity(cityId);
-        ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        database.beginTransaction();
-        try {
-
-            Cursor c = database.rawQuery("SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY + " , "
-                    + Forecast.FeedEntry.COLUMN_TIME + " , "
-                    + Forecast.FeedEntry.COLUMN_TEMP_MIN + " , "
-                    + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , "
-                    + Forecast.FeedEntry.COLUMN_PRESSURE + " , "
-                    + Forecast.FeedEntry.COLUMN_HUMIDITY + " , "
-                    + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , "
-                    + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , "
-                    + Forecast.FeedEntry.COLUMN_CLOUDS + " , "
-                    + Forecast.FeedEntry.COLUMN_ICON_CODE + " FROM "
-                    + Forecast.FeedEntry.TABLE
-                    + " WHERE " + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
-                    + ";"
-                    , null);
-            database.setTransactionSuccessful();
-            while (c.moveToNext()) {
-                Forecast forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
-                        c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
-                forecasts.add(forecast);
-            }
-            c.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
-
-        return forecasts;
-    }
-
-    public ArrayList<Forecast> loadForecasts(long cityId, long timeMin, long timeMax){
-        ForecastCity city = loadCity(cityId);
-        ArrayList<Forecast> forecasts = new ArrayList<Forecast>();
-        database.beginTransaction();
-        try {
-            String sql = "SELECT "
-                    + Forecast.FeedEntry.COLUMN_CITY + " , "
-                    + Forecast.FeedEntry.COLUMN_TIME + " , "
-                    + Forecast.FeedEntry.COLUMN_TEMP_MIN + " , "
-                    + Forecast.FeedEntry.COLUMN_TEMP_MAX + " , "
-                    + Forecast.FeedEntry.COLUMN_PRESSURE + " , "
-                    + Forecast.FeedEntry.COLUMN_HUMIDITY + " , "
-                    + Forecast.FeedEntry.COLUMN_WIND_SPEED + " , "
-                    + Forecast.FeedEntry.COLUMN_WIND_ANGLE + " , "
-                    + Forecast.FeedEntry.COLUMN_CLOUDS + " , "
-                    + Forecast.FeedEntry.COLUMN_ICON_CODE
-                    + " FROM " + Forecast.FeedEntry.TABLE
-                    + " WHERE " + Forecast.FeedEntry.COLUMN_CITY + " = " + cityId
-                    + " AND " + Forecast.FeedEntry.COLUMN_TIME + " >= " + timeMin
-                    + " AND " + Forecast.FeedEntry.COLUMN_TIME + " <= " + timeMax
-                    + " ORDER BY " + Forecast.FeedEntry.COLUMN_TIME
-                    + ";";
-            Cursor c = database.rawQuery(sql, null);
-            database.setTransactionSuccessful();
-            while (c.moveToNext()) {
-                Forecast forecast = new Forecast(city, c.getLong(1), c.getFloat(2), c.getFloat(3), c.getFloat(4), c.getFloat(5),
-                        c.getFloat(6), c.getFloat(7), c.getFloat(8), c.getString(9));
-                forecasts.add(forecast);
-            }
-            c.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
-
-        return forecasts;
     }
 
     public Forecast loadForecast(long cityId, long time){

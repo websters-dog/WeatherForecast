@@ -22,7 +22,7 @@ public class HttpLoader {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             InputStream inputStream = connection.getInputStream();
             if(connection.getResponseCode() == HttpURLConnection.HTTP_OK){
-                int bytesRead = 0;
+                int bytesRead;
                 byte[] buffer = new byte[1024];
                 while((bytesRead = inputStream.read(buffer)) > 0){
                     outputStream.write(buffer, 0, bytesRead);

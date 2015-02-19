@@ -22,7 +22,6 @@ public class FragmentForecasts extends Fragment {
     public static final String KEY_CITY = "CITY";
     public static final String KEY_START_TIME = "START_TIME";
 
-    public static int DAYS_COUNT = 5;
     public static long NYCHTHEMERON = 1000 * 60 * 60 * 24;
     public static long TIME_INTERVAL = 1000 * 60 * 60 * 3;
 
@@ -35,9 +34,6 @@ public class FragmentForecasts extends Fragment {
     }
 
     private ForecastLoader<View> forecastLoader;
-
-    private TextView textHeader;
-    private ListView listDates;
 
     private ForecastCity city;
     private ScreenController screenController;
@@ -57,8 +53,8 @@ public class FragmentForecasts extends Fragment {
 
         this.city = (ForecastCity) getArguments().get(KEY_CITY);
 
-        textHeader = (TextView) rootView.findViewById(R.id.t_forecast_header);
-        listDates= (ListView) rootView.findViewById(R.id.l_forecasts);
+        TextView textHeader = (TextView) rootView.findViewById(R.id.t_forecast_header);
+        ListView listDates = (ListView) rootView.findViewById(R.id.l_forecasts);
 
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
