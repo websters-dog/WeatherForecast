@@ -7,16 +7,18 @@
     <string name="longitude">longitude:</string>
     <string name="search">search</string>
     <string name="city">city:</string>
-    <string name="incorrect_search_data">Input data incorrect. Please recheck.</string>
-    <string name="search_error">Data loading error. Please check your connection.</string>
+    <string name="incorrect_search_data">Input data incorrect.\n Please check values.</string>
+    <string name="load_error">Data loading error.\n Please check your connection.</string>
+    <string name="loading">Loading...</string>
     <string name="forecast_line" formatted="false">
         %s\n
-        temperature: %.1f...%.1f °C \n
+        temperature: %.1f…%.1f °C \n
         pressure: %.1f hPa \n
         humidity: %.1f %% \n
         clouds: %.1f %%  \n
         wind: %.1f m/s
     </string>
+
 
 
 

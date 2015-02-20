@@ -152,7 +152,7 @@ public class FragmentSearch extends Fragment {
             if (result != null) {
                 screenController.showDateScreen(result);
             } else {
-                Toast.makeText(getActivity(), getResources().getString(R.string.search_error), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getResources().getString(R.string.load_error), Toast.LENGTH_LONG).show();
             }
             loadingLayout.setVisibility(View.GONE);
         }

@@ -1,6 +1,5 @@
 package net.alexplay.weatherforecast.app;
 
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -17,9 +16,6 @@ class ForecastLoader<T> extends HandlerThread {
     private final static String REQUEST_URL = "http://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&units=metric";
     private static final int MESSAGE_LOAD = 1;
 
-    private static  final String RAIN_URL = "https://ssl.gstatic.com/onebox/weather/256/rain.png";
-    private static  final String SUNNY_URL = "https://ssl.gstatic.com/onebox/weather/256/sunny.png";
-    private static  final String CLOUDY_URL = "https://ssl.gstatic.com/onebox/weather/256/cloudy.png";
 
     private Handler responseHandler;
     private Handler loadHandler;
@@ -27,15 +23,12 @@ class ForecastLoader<T> extends HandlerThread {
     private Map<T, ForecastCity> forecastCities = Collections.synchronizedMap(new HashMap<T, ForecastCity>());
     private Map<T, Long> forecastClocks = Collections.synchronizedMap(new HashMap<T, Long>());
 
-    private ImageLoader imageLoader;
-
     private DatabaseWorker databaseWorker;
 
     public ForecastLoader(Handler responseHandler, DatabaseWorker databaseWorker) {
         super("ForecastLoader");
         this.responseHandler = responseHandler;
         this.databaseWorker = databaseWorker;
-        imageLoader = new ImageLoader();
     }
 
     @Override
@@ -89,42 +82,16 @@ class ForecastLoader<T> extends HandlerThread {
         }
 
         final Forecast resultForecast = tmpResultForecast;
-        if(resultForecast != null){
-            String imageUrl;
-            if(resultForecast.iconCode.contains("01") || resultForecast.iconCode.contains("02")){
-                imageUrl = SUNNY_URL;
-            } else if(resultForecast.iconCode.contains("03") || resultForecast.iconCode.contains("04")){
-                imageUrl = CLOUDY_URL;
-            } else {
-                imageUrl = RAIN_URL;
+        responseHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (forecastClocks.get(t).equals(forecastClock)) {
+                    forecastCities.remove(t);
+                    forecastClocks.remove(t);
+                    loadListener.onLoad(t, resultForecast);
+                }
             }
-            imageLoader.loadImage(imageUrl, new ImageLoader.LoadListener() {
-                @Override
-                public void onLoad(final Drawable drawable) {
-                    responseHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (forecastClocks.get(t).equals(forecastClock)) {
-                                forecastCities.remove(t);
-                                forecastClocks.remove(t);
-                                loadListener.onLoad(t, resultForecast, drawable);
-                            }
-                        }
-                    });
-                }
-            });
-        } else {
-            responseHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (forecastClocks.get(t).equals(forecastClock)) {
-                        forecastCities.remove(t);
-                        forecastClocks.remove(t);
-                        loadListener.onLoad(t, null, null);
-                    }
-                }
-            });
-        }
+        });
 
 
 
@@ -135,7 +102,7 @@ class ForecastLoader<T> extends HandlerThread {
     }
 
     public interface LoadListener<T>{
-        public void onLoad(T t, Forecast forecast, Drawable forecastImage);
+        public void onLoad(T t, Forecast forecast);
     }
 
 

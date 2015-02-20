@@ -1,6 +1,5 @@
 package net.alexplay.weatherforecast.app;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -11,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +21,10 @@ public class FragmentForecasts extends Fragment {
 
     public static final String KEY_CITY = "CITY";
     public static final String KEY_START_TIME = "START_TIME";
+
+    private static  final String RAIN_URL = "https://ssl.gstatic.com/onebox/weather/256/rain.png";
+    private static  final String SUNNY_URL = "https://ssl.gstatic.com/onebox/weather/256/sunny.png";
+    private static  final String CLOUDY_URL = "https://ssl.gstatic.com/onebox/weather/256/cloudy.png";
 
     public static long NYCHTHEMERON = 1000 * 60 * 60 * 24;
     public static long TIME_INTERVAL = 1000 * 60 * 60 * 3;
@@ -59,15 +63,32 @@ public class FragmentForecasts extends Fragment {
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
             @Override
-            public void onLoad(View view, Forecast forecast, Drawable forecastDrawable) {
+            public void onLoad(View view, Forecast forecast) {
+
+                TextView textView = (TextView) view.findViewById(R.id.t_forecast);
+                ImageView imageView = (ImageView) view.findViewById(R.id.i_forecast);
+
                 if (forecast != null) {
-                    TextView textView = (TextView) view.findViewById(R.id.t_forecast);
+
                     String text = String.format(getResources().getString(R.string.forecast_line),
                             DATE_FORMAT_LIST.format(new Date(forecast.time)),
                             forecast.tempMin, forecast.tempMax, forecast.pressure, forecast.humidity, forecast.cloudsPercent, forecast.windSpeed);
                     textView.setText(text);
-                    ImageView imageView = (ImageView) view.findViewById(R.id.i_forecast);
-                    imageView.setImageDrawable(forecastDrawable);
+
+                    String imageUrl;
+                    if(forecast.iconCode.contains("01") || forecast.iconCode.contains("02")){
+                        imageUrl = SUNNY_URL;
+                    } else if(forecast.iconCode.contains("03") || forecast.iconCode.contains("04")){
+                        imageUrl = CLOUDY_URL;
+                    } else {
+                        imageUrl = RAIN_URL;
+                    }
+                    Picasso.with(getActivity()).load(imageUrl)
+                            .placeholder(R.drawable.spinner).error(R.drawable.error).into(imageView);
+
+                } else {
+                    textView.setText(getResources().getString(R.string.load_error));
+                    imageView.setImageDrawable(getResources().getDrawable(R.drawable.error));
                 }
             }
         });
@@ -126,7 +147,7 @@ public class FragmentForecasts extends Fragment {
             }
             TextView textView = (TextView) convertView.findViewById(R.id.t_forecast);
             Long forecastClock = (Long) getItem(position);
-            textView.setText(String.format(DATE_FORMAT_LIST.format(new Date(forecastClock)) + "\n ---"));
+            textView.setText(String.format(DATE_FORMAT_LIST.format(new Date(forecastClock)) + "\n" + getResources().getString(R.string.loading)));
             ImageView imageView = (ImageView) convertView.findViewById(R.id.i_forecast);
             imageView.setImageDrawable(null);
             forecastLoader.loadForecast(convertView, city, forecastClock);
