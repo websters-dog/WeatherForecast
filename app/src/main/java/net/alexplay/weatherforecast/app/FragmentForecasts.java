@@ -86,6 +86,9 @@ public class FragmentForecasts extends Fragment {
                             .placeholder(R.drawable.spinner).error(R.drawable.error).into(imageView);
 
                 } else {
+                    String prevText = textView.getText().toString();
+                    prevText = prevText.split("\n")[0];
+                    textView.setText(String.format(prevText + "\n" + getResources().getString(R.string.load_error)));
                     Picasso.with(getActivity()).load(R.drawable.error).into(imageView);
                 }
             }

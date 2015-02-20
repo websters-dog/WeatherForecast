@@ -7,6 +7,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,20 +82,25 @@ class ForecastLoader<T> extends HandlerThread {
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
             try {
-//                String result = new String(HttpLoader.load();
                 HttpRequest request =  HttpRequest.get(String.format(REQUEST_URL, city.latitude, city.longitude));
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                request.receive(outputStream);
-                for (Forecast tmpForecast : JSONForecastReader.getForecasts(outputStream.toString())){
-                    if(tmpForecast.time == forecastClock){
-                        tmpResultForecast = tmpForecast;
-                        break;
+                if (request.ok()) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    request.receive(outputStream);
+                    for (Forecast tmpForecast : JSONForecastReader.getForecasts(outputStream.toString())){
+                        if(tmpForecast.time == forecastClock){
+                            tmpResultForecast = tmpForecast;
+                            break;
+                        }
                     }
-                }
-                if (tmpResultForecast != null) {
-                    databaseWorker.saveForecast(tmpResultForecast);
+                    if (tmpResultForecast != null) {
+                        databaseWorker.saveForecast(tmpResultForecast);
+                    }
+                } else {
+                    throw new HttpRequest.HttpRequestException(new IOException("Loading error: request status=" + request.message()));
                 }
             } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (HttpRequest.HttpRequestException e){
                 e.printStackTrace();
             }
         }

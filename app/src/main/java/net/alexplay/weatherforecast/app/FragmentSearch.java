@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -129,7 +130,7 @@ public class FragmentSearch extends Fragment {
                         return forecasts.get(0).city;
                     }
                 } else {
-                    throw new HttpRequest.HttpRequestException(new IOException("Loading error: request.status=" + request.message()));
+                    throw new HttpRequest.HttpRequestException(new IOException("Loading error: request status=" + request.message()));
                 }
             } catch (final JSONException e) {
                 e.printStackTrace();
@@ -161,10 +162,13 @@ public class FragmentSearch extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putSerializable(FragmentDays.KEY_CITY, city);
         fragmentDays.setArguments(bundle);
-        ViewGroup parent = (ViewGroup) getView().getParent();
-        if (parent != null) {
-            getFragmentManager().beginTransaction()
-                    .replace(parent.getId(), fragmentDays).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+        View view = getView();
+        if (view != null) {
+            ViewParent parent = view.getParent();
+            if (parent != null) {
+                getFragmentManager().beginTransaction()
+                        .replace(((ViewGroup) parent).getId(), fragmentDays).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+            }
         }
     }
 }

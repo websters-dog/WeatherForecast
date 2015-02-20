@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -88,11 +89,16 @@ public class FragmentDays extends Fragment {
             bundle.putSerializable(FragmentForecasts.KEY_CITY, city);
             bundle.putSerializable(FragmentForecasts.KEY_START_TIME, dayZeroTime);
             fragmentForecasts.setArguments(bundle);
-            ViewGroup parent = (ViewGroup) getView().getParent();
-            if (parent != null) {
-                getFragmentManager().beginTransaction()
-                        .replace(parent.getId(), fragmentForecasts).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+
+            View view = getView();
+            if (view != null) {
+                ViewParent parent = view.getParent();
+                if (parent != null) {
+                    getFragmentManager().beginTransaction()
+                            .replace(((ViewGroup) parent).getId(), fragmentForecasts).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+                }
             }
+
         }
     }
 
