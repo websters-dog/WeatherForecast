@@ -40,7 +40,6 @@ public class FragmentForecasts extends Fragment {
     private ForecastLoader<View> forecastLoader;
 
     private ForecastCity city;
-    private ScreenController screenController;
 
     private long startTime;
     private long openTime;
@@ -91,30 +90,30 @@ public class FragmentForecasts extends Fragment {
                 }
             }
         });
+        forecastLoader.start();
+        forecastLoader.getLooper();
 
         startTime = getArguments().getLong(KEY_START_TIME);
         openTime = System.currentTimeMillis();
         textHeader.setText(city.name + "\n" + DATE_FORMAT_HEADER.format(new Date(startTime)));
-        forecastLoader.start();
         listForecasts.setAdapter(new DaysAdapter());
 
         return rootView;
     }
 
-    public void setScreenController(ScreenController screenController) {
-        this.screenController = screenController;
+    @Override
+    public void onDestroyView() {
+        forecastLoader.clearQueue();
+        super.onDestroyView();
     }
-
 
     @Override
     public void onDetach() {
-        super.onDetach();
         forecastLoader.quit();
+        super.onDetach();
     }
 
     private class DaysAdapter extends BaseAdapter{
-
-
         @Override
         public int getCount() {
             if(startTime < openTime){

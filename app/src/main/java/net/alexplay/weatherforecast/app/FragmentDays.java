@@ -21,7 +21,6 @@ public class FragmentDays extends Fragment {
     public final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MMMM/yyyy");
 
     private ForecastCity city;
-    private ScreenController screenController;
 
     public FragmentDays() {
     }
@@ -41,13 +40,6 @@ public class FragmentDays extends Fragment {
 
         return rootView;
     }
-
-
-    public void setScreenController(ScreenController screenController) {
-        this.screenController = screenController;
-    }
-
-
 
     private class DaysAdapter extends BaseAdapter{
 
@@ -89,7 +81,18 @@ public class FragmentDays extends Fragment {
 
         @Override
         public void onClick(View v) {
-            screenController.showForecastScreen(city, dayZeroTime);
+
+            FragmentForecasts fragmentForecasts = new FragmentForecasts();
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(FragmentForecasts.KEY_CITY, city);
+            bundle.putSerializable(FragmentForecasts.KEY_START_TIME, dayZeroTime);
+            fragmentForecasts.setArguments(bundle);
+            ViewGroup parent = (ViewGroup) getView().getParent();
+            if (parent != null) {
+                getFragmentManager().beginTransaction()
+                        .replace(parent.getId(), fragmentForecasts).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+            }
         }
     }
 

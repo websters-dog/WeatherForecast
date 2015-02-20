@@ -3,7 +3,6 @@ package net.alexplay.weatherforecast.app;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.util.Log;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -33,33 +32,53 @@ class ForecastLoader<T> extends HandlerThread {
 
     @Override
     protected void onLooperPrepared() {
-        super.onLooperPrepared();
-        loadHandler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == MESSAGE_LOAD){
-                    T t = (T) msg.obj;
-                    handleRequest(t);
+        synchronized (this) {
+            loadHandler = new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == MESSAGE_LOAD){
+                        T t = (T) msg.obj;
+                        handleRequest(t);
+                    }
                 }
-            }
-        };
+            };
+            notifyAll();
+        }
+    }
+
+    public void clearQueue(){
+        if (loadHandler != null) {
+            loadHandler.removeMessages(MESSAGE_LOAD);
+        }
+        forecastCities.clear();
+        forecastClocks.clear();
     }
 
     public void loadForecast(T t, ForecastCity city, long time){
         forecastCities.put(t, city);
         forecastClocks.put(t, time);
+
+        synchronized (this) {
+            while (loadHandler == null) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
         loadHandler.obtainMessage(MESSAGE_LOAD, t).sendToTarget();
     }
 
     private void handleRequest(final T t){
         Forecast tmpResultForecast;
+
         final Long forecastClock = forecastClocks.get(t);
+
         ForecastCity city = forecastCities.get(t);
         if(city == null) return;
 
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
-            Log.d("LOADER", "load online: city=" + city.id + "; t=" + forecastClock);
             try {
                 String result = new String(HttpLoader.load(String.format(REQUEST_URL, city.latitude, city.longitude)));
                 for (Forecast tmpForecast : HttpLoader.processForecastString(result)){
@@ -69,7 +88,6 @@ class ForecastLoader<T> extends HandlerThread {
                     }
                 }
                 if (tmpResultForecast != null) {
-                    Log.d("LOADER", "save online: city=" + city.id + "; t=" + tmpResultForecast.time);
                     databaseWorker.saveForecast(tmpResultForecast);
                 }
             } catch (IOException e) {
@@ -77,15 +95,14 @@ class ForecastLoader<T> extends HandlerThread {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else {
-            Log.d("LOADER", "load from db");
         }
 
         final Forecast resultForecast = tmpResultForecast;
         responseHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (forecastClocks.get(t).equals(forecastClock)) {
+                Long clock = forecastClocks.get(t);
+                if (clock != null && clock.equals(forecastClock)) {
                     forecastCities.remove(t);
                     forecastClocks.remove(t);
                     loadListener.onLoad(t, resultForecast);

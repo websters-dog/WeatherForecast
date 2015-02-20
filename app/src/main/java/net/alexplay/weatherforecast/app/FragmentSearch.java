@@ -31,7 +31,6 @@ public class FragmentSearch extends Fragment {
     private EditText editLatitude;
     private View loadingLayout;
 
-    private ScreenController screenController;
     private AsyncTask<Float, Void, ForecastCity> preloadTask;
 
     public FragmentSearch() {
@@ -40,6 +39,8 @@ public class FragmentSearch extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
         View rootView = inflater.inflate(R.layout.search_fragment, container, false);
 
         editLatitude = (EditText) rootView.findViewById(R.id.e_latitude);
@@ -107,10 +108,6 @@ public class FragmentSearch extends Fragment {
         super.onDetach();
     }
 
-    public void setScreenController(ScreenController screenController) {
-        this.screenController = screenController;
-    }
-
     private class PreloadAsynkTask extends AsyncTask<Float, Void, ForecastCity> {
 
         @Override
@@ -150,11 +147,23 @@ public class FragmentSearch extends Fragment {
         protected void onPostExecute(ForecastCity result) {
             super.onPostExecute(result);
             if (result != null) {
-                screenController.showDateScreen(result);
+                showDateFragment(result);
             } else {
                 Toast.makeText(getActivity(), getResources().getString(R.string.load_error), Toast.LENGTH_LONG).show();
             }
             loadingLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void showDateFragment(ForecastCity city){
+        FragmentDays fragmentDays = new FragmentDays();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(FragmentDays.KEY_CITY, city);
+        fragmentDays.setArguments(bundle);
+        ViewGroup parent = (ViewGroup) getView().getParent();
+        if (parent != null) {
+            getFragmentManager().beginTransaction()
+                    .replace(parent.getId(), fragmentDays).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
         }
     }
 }

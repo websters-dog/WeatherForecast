@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 public class DatabaseWorker {
 
@@ -88,7 +87,6 @@ public class DatabaseWorker {
             values.put(Forecast.FeedEntry.COLUMN_ICON_CODE, forecast.iconCode);
             values.put(Forecast.FeedEntry.COLUMN_LOAD_TIME, System.currentTimeMillis());
             database.insertWithOnConflict(Forecast.FeedEntry.TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-            Log.d("DB", "put:" + "\ntime=" + forecast.time + "; city=" + forecast.city.name);
             database.setTransactionSuccessful();
 
         } catch (Exception e) {
@@ -119,7 +117,6 @@ public class DatabaseWorker {
                     + " AND " + Forecast.FeedEntry.COLUMN_TIME + " = " + time
                     + " AND ((" + System.currentTimeMillis() + " - " + Forecast.FeedEntry.COLUMN_LOAD_TIME + ") < " + Forecast.ACTUAL_TIME + ")"
                     + ";";
-            Log.d("DB", sql);
             Cursor c = database.rawQuery(sql, null);
             database.setTransactionSuccessful();
             if(c.moveToFirst()){
