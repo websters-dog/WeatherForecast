@@ -42,6 +42,7 @@ public class Forecast {
                 + "; cloudsPercent" + cloudsPercent + "; iconCode=" + iconCode;
     }
 
+    //keys for DB
     public static abstract class FeedEntry {
 
         public static final String TABLE = "FORECAST";
@@ -59,6 +60,7 @@ public class Forecast {
 
     }
 
+    //keys for JSON
     public static abstract class JsonEntry {
 
         public static final String OBJECTS_ARRAY = "list";

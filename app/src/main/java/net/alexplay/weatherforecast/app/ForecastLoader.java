@@ -48,6 +48,7 @@ class ForecastLoader<T> extends HandlerThread {
         }
     }
 
+    //stop all loadings and clear data for loading
     public void clearQueue(){
         if (loadHandler != null) {
             loadHandler.removeMessages(MESSAGE_LOAD);
@@ -56,10 +57,12 @@ class ForecastLoader<T> extends HandlerThread {
         forecastClocks.clear();
     }
 
+    //return count of loadings in queue
     public int getActiveLoadCount(){
         return forecastClocks.size();
     }
 
+    //add new loading to queue
     public void loadForecast(T t, ForecastCity city, long time){
         forecastCities.put(t, city);
         forecastClocks.put(t, time);

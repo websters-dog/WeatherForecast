@@ -12,18 +12,21 @@ public class DatabaseWorker {
 
 	private SQLiteDatabase database;
 
+
+    public static DatabaseWorker get(){
+        return databaseWorker;
+    }
+
     private DatabaseWorker() {
 	}
 
+    //must be invoked before object using
     public void setContext(Context context){
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
         database = databaseHelper.getWritableDatabase();
     }
-	
-	public static DatabaseWorker get(){
-		return databaseWorker;
-	}
 
+    //save or update city
     public void saveCity(ForecastCity city){
         database.beginTransaction();
         try {
@@ -69,6 +72,7 @@ public class DatabaseWorker {
         return null;
     }
 
+    //save or update forecast
     public void saveForecast(Forecast forecast){
 
         database.beginTransaction();
@@ -96,6 +100,7 @@ public class DatabaseWorker {
         }
     }
 
+    //returns a actual (that was loaded in DB later than the (currentTime - Forecast.ACTUAL_TIME)) forecast by city.id and time
     public Forecast loadForecast(long cityId, long time){
         ForecastCity city = loadCity(cityId);
         database.beginTransaction();

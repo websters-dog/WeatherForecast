@@ -21,6 +21,7 @@ public class ForecastCity implements Serializable{
         return "ForecastCity: id=" + id + "; name=" + name + "; lat=" + latitude + "; lon=" + longitude;
     }
 
+    //keys for DB
     public static abstract class FeedEntry {
 
         public static final String TABLE = "CITIES";
@@ -31,6 +32,7 @@ public class ForecastCity implements Serializable{
 
     }
 
+    //keys for JSON
     public static abstract class JsonEntry {
 
         public static final String OBJECT = "city";

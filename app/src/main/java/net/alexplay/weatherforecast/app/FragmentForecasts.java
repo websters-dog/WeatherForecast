@@ -102,7 +102,7 @@ public class FragmentForecasts extends Fragment {
                     textView.setText(String.format(prevText + "\n" + getResources().getString(R.string.load_error)));
                     Picasso.with(getActivity()).load(R.drawable.error).into(imageView);
                 }
-                
+
                 if(swipeRefreshLayout.isRefreshing() && forecastLoader.getActiveLoadCount() == 0){
                     swipeRefreshLayout.setRefreshing(false);
                 }
@@ -160,7 +160,7 @@ public class FragmentForecasts extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.forecast_list_item, null);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.forecast_list_item, parent);
             }
             TextView textView = (TextView) convertView.findViewById(R.id.t_forecast);
             Long forecastClock = (Long) getItem(position);
