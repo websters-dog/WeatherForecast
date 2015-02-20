@@ -1,42 +1,14 @@
 package net.alexplay.weatherforecast.app;
 
-import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
-public class HttpLoader {
+public class JSONForecastReader {
 
-    public static byte[] load(String urlString) throws IOException {
-        Log.d("HTTP_LOADER", "load: " + urlString);
-        URL url = new URL(urlString);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            InputStream inputStream = connection.getInputStream();
-            if(connection.getResponseCode() == HttpURLConnection.HTTP_OK){
-                int bytesRead;
-                byte[] buffer = new byte[1024];
-                while((bytesRead = inputStream.read(buffer)) > 0){
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-                return outputStream.toByteArray();
-            } else {
-                throw new IOException("Response code: \"" + connection.getResponseCode() + "\"");
-            }
-        } finally {
-            connection.disconnect();
-        }
-    }
-
-    public static ArrayList<Forecast> processForecastString(String jsonString) throws JSONException {
+    public static ArrayList<Forecast> getForecasts(String jsonString) throws JSONException {
         JSONObject jsonForecastMain = new JSONObject(jsonString);
         JSONObject jsonCity = jsonForecastMain.getJSONObject(ForecastCity.JsonEntry.OBJECT);
 

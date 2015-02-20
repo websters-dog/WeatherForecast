@@ -12,8 +12,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.github.kevinsawicki.http.HttpRequest;
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -101,21 +103,24 @@ public class FragmentSearch extends Fragment {
     }
 
     @Override
-    public void onDetach() {
+    public void onDestroyView() {
         if(preloadTask != null && preloadTask.getStatus() == AsyncTask.Status.RUNNING){
             preloadTask.cancel(true);
         }
-        super.onDetach();
+        super.onDestroyView();
     }
+
 
     private class PreloadAsynkTask extends AsyncTask<Float, Void, ForecastCity> {
 
         @Override
         protected ForecastCity doInBackground(Float... params) {
             try {
-                String result = new String(HttpLoader.load(String.format(REQUEST_URL, params[0], params[1])));
-                if (result.length() > 0) {
-                    ArrayList<Forecast> forecasts = HttpLoader.processForecastString(result);
+                HttpRequest request =  HttpRequest.get(String.format(String.format(REQUEST_URL, params[0], params[1])));
+                if (request.ok()) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    request.receive(outputStream);
+                    ArrayList<Forecast> forecasts = JSONForecastReader.getForecasts(outputStream.toString());
                     if (forecasts != null && forecasts.size() > 0) {
                         int count = PRELOAD_COUNT > forecasts.size() ? forecasts.size() : PRELOAD_COUNT;
                         for (int i = 0; i < count; i++) {
@@ -123,23 +128,19 @@ public class FragmentSearch extends Fragment {
                         }
                         return forecasts.get(0).city;
                     }
+                } else {
+                    throw new HttpRequest.HttpRequestException(new IOException("Loading error: request.status=" + request.message()));
                 }
-            } catch (final IOException e) {
-                e.printStackTrace();
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
             } catch (final JSONException e) {
                 e.printStackTrace();
-                getActivity().runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
+            } catch (HttpRequest.HttpRequestException e) {
+                e.printStackTrace();
             }
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    Toast.makeText(getActivity(), getResources().getString(R.string.load_error), Toast.LENGTH_LONG).show();
+                }
+            });
             return null;
         }
 

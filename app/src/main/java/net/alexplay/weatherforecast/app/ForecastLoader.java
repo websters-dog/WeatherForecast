@@ -3,9 +3,10 @@ package net.alexplay.weatherforecast.app;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import com.github.kevinsawicki.http.HttpRequest;
 import org.json.JSONException;
 
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +63,7 @@ class ForecastLoader<T> extends HandlerThread {
             while (loadHandler == null) {
                 try {
                     wait();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
             }
         }
@@ -80,8 +81,11 @@ class ForecastLoader<T> extends HandlerThread {
         tmpResultForecast = databaseWorker.loadForecast(city.id, forecastClock);
         if (tmpResultForecast == null) {
             try {
-                String result = new String(HttpLoader.load(String.format(REQUEST_URL, city.latitude, city.longitude)));
-                for (Forecast tmpForecast : HttpLoader.processForecastString(result)){
+//                String result = new String(HttpLoader.load();
+                HttpRequest request =  HttpRequest.get(String.format(REQUEST_URL, city.latitude, city.longitude));
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                request.receive(outputStream);
+                for (Forecast tmpForecast : JSONForecastReader.getForecasts(outputStream.toString())){
                     if(tmpForecast.time == forecastClock){
                         tmpResultForecast = tmpForecast;
                         break;
@@ -90,8 +94,6 @@ class ForecastLoader<T> extends HandlerThread {
                 if (tmpResultForecast != null) {
                     databaseWorker.saveForecast(tmpResultForecast);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
