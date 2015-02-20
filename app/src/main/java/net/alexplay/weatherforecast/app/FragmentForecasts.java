@@ -58,7 +58,7 @@ public class FragmentForecasts extends Fragment {
         this.city = (ForecastCity) getArguments().get(KEY_CITY);
 
         TextView textHeader = (TextView) rootView.findViewById(R.id.t_forecast_header);
-        ListView listDates = (ListView) rootView.findViewById(R.id.l_forecasts);
+        ListView listForecasts = (ListView) rootView.findViewById(R.id.l_forecasts);
 
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
@@ -87,8 +87,7 @@ public class FragmentForecasts extends Fragment {
                             .placeholder(R.drawable.spinner).error(R.drawable.error).into(imageView);
 
                 } else {
-                    textView.setText(getResources().getString(R.string.load_error));
-                    imageView.setImageDrawable(getResources().getDrawable(R.drawable.error));
+                    Picasso.with(getActivity()).load(R.drawable.error).into(imageView);
                 }
             }
         });
@@ -97,7 +96,7 @@ public class FragmentForecasts extends Fragment {
         openTime = System.currentTimeMillis();
         textHeader.setText(city.name + "\n" + DATE_FORMAT_HEADER.format(new Date(startTime)));
         forecastLoader.start();
-        listDates.setAdapter(new DaysAdapter());
+        listForecasts.setAdapter(new DaysAdapter());
 
         return rootView;
     }
@@ -149,7 +148,7 @@ public class FragmentForecasts extends Fragment {
             Long forecastClock = (Long) getItem(position);
             textView.setText(String.format(DATE_FORMAT_LIST.format(new Date(forecastClock)) + "\n" + getResources().getString(R.string.loading)));
             ImageView imageView = (ImageView) convertView.findViewById(R.id.i_forecast);
-            imageView.setImageDrawable(null);
+            Picasso.with(getActivity()).load(R.drawable.spinner).into(imageView);
             forecastLoader.loadForecast(convertView, city, forecastClock);
             return convertView;
         }
