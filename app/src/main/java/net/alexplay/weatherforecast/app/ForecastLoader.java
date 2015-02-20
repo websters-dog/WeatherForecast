@@ -56,6 +56,10 @@ class ForecastLoader<T> extends HandlerThread {
         forecastClocks.clear();
     }
 
+    public int getActiveLoadCount(){
+        return forecastClocks.size();
+    }
+
     public void loadForecast(T t, ForecastCity city, long time){
         forecastCities.put(t, city);
         forecastClocks.put(t, time);

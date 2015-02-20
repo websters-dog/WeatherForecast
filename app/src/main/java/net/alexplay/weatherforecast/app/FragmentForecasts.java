@@ -3,6 +3,7 @@ package net.alexplay.weatherforecast.app;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,8 @@ public class FragmentForecasts extends Fragment {
 
     private long startTime;
     private long openTime;
+    private DaysAdapter forecastsAdapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
 
     public FragmentForecasts() {
@@ -58,6 +61,14 @@ public class FragmentForecasts extends Fragment {
 
         TextView textHeader = (TextView) rootView.findViewById(R.id.t_forecast_header);
         ListView listForecasts = (ListView) rootView.findViewById(R.id.l_forecasts);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.l_swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                forecastsAdapter.notifyDataSetChanged();
+            }
+        });
 
         forecastLoader = new ForecastLoader<View>(new Handler(), DatabaseWorker.get());
         forecastLoader.setLoadListener(new ForecastLoader.LoadListener<View>() {
@@ -91,6 +102,10 @@ public class FragmentForecasts extends Fragment {
                     textView.setText(String.format(prevText + "\n" + getResources().getString(R.string.load_error)));
                     Picasso.with(getActivity()).load(R.drawable.error).into(imageView);
                 }
+                
+                if(swipeRefreshLayout.isRefreshing() && forecastLoader.getActiveLoadCount() == 0){
+                    swipeRefreshLayout.setRefreshing(false);
+                }
             }
         });
         forecastLoader.start();
@@ -99,7 +114,8 @@ public class FragmentForecasts extends Fragment {
         startTime = getArguments().getLong(KEY_START_TIME);
         openTime = System.currentTimeMillis();
         textHeader.setText(city.name + "\n" + DATE_FORMAT_HEADER.format(new Date(startTime)));
-        listForecasts.setAdapter(new DaysAdapter());
+        forecastsAdapter = new DaysAdapter();
+        listForecasts.setAdapter(forecastsAdapter);
 
         return rootView;
     }

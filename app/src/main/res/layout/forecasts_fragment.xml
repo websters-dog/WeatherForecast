@@ -13,10 +13,16 @@
             android:textSize="@dimen/text_size"
             android:text=""/>
 
-    <ListView
-            android:id="@+id/l_forecasts"
+    <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/l_swipe_refresh"
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_height="wrap_content">
+
+        <ListView
+                android:id="@+id/l_forecasts"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center_horizontal"/>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
