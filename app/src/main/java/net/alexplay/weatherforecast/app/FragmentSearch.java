@@ -1,6 +1,5 @@
 package net.alexplay.weatherforecast.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -99,11 +98,6 @@ public class FragmentSearch extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
-    @Override
     public void onDestroyView() {
         if(preloadTask != null && preloadTask.getStatus() == AsyncTask.Status.RUNNING){
             preloadTask.cancel(true);
@@ -111,6 +105,20 @@ public class FragmentSearch extends Fragment {
         super.onDestroyView();
     }
 
+    private void showDateFragment(ForecastCity city){
+        FragmentDays fragmentDays = new FragmentDays();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(FragmentDays.KEY_CITY, city);
+        fragmentDays.setArguments(bundle);
+        View view = getView();
+        if (view != null) {
+            ViewParent parent = view.getParent();
+            if (parent != null) {
+                getFragmentManager().beginTransaction()
+                        .replace(((ViewGroup) parent).getId(), fragmentDays).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
+            }
+        }
+    }
 
     private class PreloadAsynkTask extends AsyncTask<Float, Void, ForecastCity> {
 
@@ -157,18 +165,4 @@ public class FragmentSearch extends Fragment {
         }
     }
 
-    private void showDateFragment(ForecastCity city){
-        FragmentDays fragmentDays = new FragmentDays();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(FragmentDays.KEY_CITY, city);
-        fragmentDays.setArguments(bundle);
-        View view = getView();
-        if (view != null) {
-            ViewParent parent = view.getParent();
-            if (parent != null) {
-                getFragmentManager().beginTransaction()
-                        .replace(((ViewGroup) parent).getId(), fragmentDays).addToBackStack(MainActivity.BACK_STACK_NAME).commit();
-            }
-        }
-    }
 }

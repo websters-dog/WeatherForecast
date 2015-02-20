@@ -160,7 +160,7 @@ public class FragmentForecasts extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             if (convertView == null) {
-                convertView = getActivity().getLayoutInflater().inflate(R.layout.forecast_list_item, parent);
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.forecast_list_item, null);
             }
             TextView textView = (TextView) convertView.findViewById(R.id.t_forecast);
             Long forecastClock = (Long) getItem(position);

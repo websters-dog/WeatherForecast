@@ -37,7 +37,7 @@ public class FragmentDays extends Fragment {
         listDates.setAdapter(new DaysAdapter());
 
         this.city = (ForecastCity) getArguments().get(KEY_CITY);
-        textHeader.setText(getResources().getString(R.string.city) + " " + city.name);
+        textHeader.setText(city.name);
 
         return rootView;
     }
